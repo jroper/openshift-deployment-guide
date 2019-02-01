@@ -1,0 +1,3 @@
+Kafka is relatively difficult to install. You need to install ZooKeeper, which Kafka uses to coordinate between its nodes, and ZooKeeper should be installed in a clustered configuration with at least three nodes. Then you need to install Kafka, which once again should be installed in a clustered configuration with at least three nodes.
+
+Fortunately, Kubernetes provides a mechanism for capturing the operational concerns of difficult deployments like this, using a feature called operators. An operator is able to encode how to provision and configure multiple deployments, allowing you as the end user to deploy it with minimal configuration. [Strimzi](https://strimzi.io/)
