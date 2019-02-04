@@ -60,8 +60,8 @@ Explain why Akka management HTTP is needed.
 
 * Show code to start management and cluster bootstrap
 
-<!--- #deployment-descriptor --->
-## Creating the deployment descriptor
+<!--- #deployment-spec --->
+## Creating the deployment spec
 
 ### RBAC
 
@@ -82,4 +82,4 @@ Explain why Akka management HTTP is needed.
 ### Health checks
 
 * Show health check configuration
-<!--- #deployment-descriptor --->
+<!--- #deployment-spec --->

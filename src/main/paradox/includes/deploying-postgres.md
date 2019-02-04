@@ -25,7 +25,7 @@ oc new-app postgresql -e POSTGRESQL_ADMIN_PASSWORD=<postgres-admin-password>
 ```
 
 @@@warning
-This places the PostgreSQL admin password in an environment variable, which is not safe, it is much better to put it in a Kubernetes secret. Unfortunately, the `oc new-app` command [does not allow](https://github.com/openshift/origin/issues/21619) configuring Kubernetes secrets when creating a new app in this way. When going to production, we recommend placing the password in a Kubernetes secret, and then reconfiguring the service after the fact to use the secret rather than placing the password directly in the descriptor.
+This places the PostgreSQL admin password in an environment variable, which is not safe, it is much better to put it in a Kubernetes secret. Unfortunately, the `oc new-app` command [does not allow](https://github.com/openshift/origin/issues/21619) configuring Kubernetes secrets when creating a new app in this way. When going to production, we recommend placing the password in a Kubernetes secret, and then reconfiguring the service after the fact to use the secret rather than placing the password directly in the spec.
 @@@
 
 Now we can watch the pods to see the `postgresql` pod created:
@@ -78,7 +78,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 ```
 @@@
 
-We've now setup the database, we now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment descriptor.
+We've now setup the database, we now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
 
 @@@vars
 ```sh
@@ -86,4 +86,4 @@ oc create secret generic $database.secret$ --from-literal=username=$database.use
 ```
 @@@
 
-When we create the deployment descriptor for the shopping cart service, we'll reference the above configured secret.
+When we create the deployment spec for the shopping cart service, we'll reference the above configured secret.

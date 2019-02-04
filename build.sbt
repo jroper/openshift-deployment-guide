@@ -13,3 +13,5 @@ paradoxProperties ++= Map(
 // Exclude the includes directory from being compiled directly
 (Compile / paradoxMarkdownToHtml / excludeFilter) := (Compile / paradoxMarkdownToHtml / excludeFilter).value ||
   ParadoxPlugin.InDirectoryFilter((Compile / paradox / sourceDirectory).value / "includes")
+
+paradoxTheme := Some(builtinParadoxTheme("generic"))

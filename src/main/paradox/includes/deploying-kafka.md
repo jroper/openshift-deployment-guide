@@ -28,13 +28,13 @@ At this point, nothing has actually been deployed other than the operator. With 
 
 ## Deploying Kafka
 
-If you're deploying to a real cluster with many physical machines, then it's best to deploy Kafka with at least three ZooKeeper nodes and three Kafka nodes. Here's a descriptor that will let you do that:
+If you're deploying to a real cluster with many physical machines, then it's best to deploy Kafka with at least three ZooKeeper nodes and three Kafka nodes. Here's a spec that will let you do that:
 
 ```yaml
 apiVersion: kafka.strimzi.io/v1alpha1
 kind: Kafka
 metadata:
-  name: kafka
+  name: strimzi
 spec:
   kafka:
     replicas: 3
@@ -66,13 +66,13 @@ To deploy this, create a file called `kafka.yaml`, and run:
 oc apply -f kafka.yaml -n myproject
 ```
 
-If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, you're machine has no resources left for anything else. So instead we'll use a descriptor that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
+If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, you're machine has no resources left for anything else. So instead we'll use a spec that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
 
 ```yaml
 apiVersion: kafka.strimzi.io/v1alpha1
 kind: Kafka
 metadata:
-  name: kafka
+  name: strimzi
 spec:
   kafka:
     replicas: 1
@@ -113,15 +113,29 @@ oc get pods -w -n myproject
 You should eventually see something like the following output, with the number of Kafka and ZooKeeper pods corresponding to how many you configured above.
 
 ```
-kafka-entity-operator-6bc7f6985c-q29p5   3/3     Running   0          44s
-kafka-kafka-0                            2/2     Running   1          91s
-kafka-kafka-1                            2/2     Running   1          91s
-kafka-kafka-2                            2/2     Running   1          91s
-kafka-zookeeper-0                        2/2     Running   0          2m30s
-kafka-zookeeper-1                        2/2     Running   0          2m30s
-kafka-zookeeper-2                        2/2     Running   0          2m30s
-strimzi-cluster-operator-78f8bf857-kpmhb 1/1     Running   0          3m10s
+strimzi-entity-operator-6bc7f6985c-q29p5   3/3     Running   0          44s
+strimzi-kafka-0                            2/2     Running   1          91s
+strimzi-kafka-1                            2/2     Running   1          91s
+strimzi-kafka-2                            2/2     Running   1          91s
+strimzi-zookeeper-0                        2/2     Running   0          2m30s
+strimzi-zookeeper-1                        2/2     Running   0          2m30s
+strimzi-zookeeper-2                        2/2     Running   0          2m30s
+strimzi-cluster-operator-78f8bf857-kpmhb   1/1     Running   0          3m10s
 ```
+
+It's also useful to see what services have been deployed:
+
+```sh
+oc get services -n myproject
+```
+
+This should show at least:
+
+```
+TODO
+```
+
+As you can see, there is a service called `strimzi-kafka-brokers`, this is the service that Kafka clients are going to connect to.
 
 Once Kafka is deployed and running, you no longer need to be logged in as an administrator, so log back in as your old user. If using Minishift, that means logging in as the developer user:
 
