@@ -161,10 +161,83 @@ If you used a different name for the Postgres database deployment, or for the Ku
 
 In @ref:[Deploying Kafka](deploying-kafka.md), we deployed a Kafka instance, which we called `kafka`. To connect to it, we simply need to pass the URL for it to our application.
 
-Lagom will automatically read an environment variable called `KAFKA_SERVICE_NAME` if present, so there's nothing to configure in our configuration file, we just need to update the spec to pass that environment variable, poing to the Kafka service we provisioned:
+Lagom will automatically read an environment variable called `KAFKA_SERVICE_NAME` if present, so there's nothing to configure in our configuration file, we just need to update the spec to pass that environment variable, pointing to the Kafka service we provisioned. The actual service name that we need to configure needs to match the SRV lookup for the Kafka broker - our Kafka broker defines a TCP port called `clients`, to lookup the IP address or host name and port number for this, we need to use a service name of `_clients._tcp.strimzi-kafka-brokers`:
 
 ```yaml
 - name: KAFKA_SERVICE_NAME
   value: "_clients._tcp.strimzi-kafka-brokers"
 ```
+
+## Configuring the service locator
+
+Lagom uses a service locator to look up other services. The service locators responsibility is to take the service name defined in a Lagom service descriptor, and translate it into an address to use when communicating with the service. In development (that is, when you run `runAll`), Lagom starts up its own development service locator, and injects that into each service, which means as a developer you don't have to worry about this aspect of deployment until you move outside the Lagom development environment. When you do that, you need to provide a service locator yourself.
+
+Akka provides an API called [Akka Discovery](https://doc.akka.io/docs/akka/current/discovery/index.html), with a number of backends, including multiple that are compatible with a Kubernetes environment. We're going to use a service locator implementation built on Akka Discovery, and then we're going to use the DNS implementation of Akka discovery to discover other services.
+
+### Dependencies
+
+First we need to add the Lagom Akka Discovery dependency to our project:
+
+Java with Maven
+: @@@vars
+```xml
+<dependency>
+  <groupId>com.lightbend.lagom</groupId>
+  <artifactId>lagom-javadsl-akka-discovery</artifactId>
+  <version>$lagom.akka.discovery.version$</version>
+</dependency>
+```
+@@@
+
+Java with sbt
+: @@@vars
+```scala
+libraryDependencies += 
+  "com.lightbend.lagom" %% "lagom-javadsl-akka-discovery" % "$lagom.akka.discovery.version$"
+```
+
+Scala with sbt
+: @@@vars
+```scala
+libraryDependencies += 
+  "com.lightbend.lagom" %% "lagom-scaladsl-akka-discovery" % "$lagom.akka.discovery.version$"
+```
+
+### Configuration
+
+Now let's configure Akka discovery to use the asynchronous DNS implementation, by adding the following to `prod-application.conf`:
+
+```
+akka {
+
+  discovery.method = akka-dns
+
+  io.dns {
+    resolver = async-dns
+    # TODO is all this needed?
+    async-dns {
+      provider-object = "akka.io.dns.internal.AsyncDnsProvider"
+      resolve-srv = true
+      resolv-conf = on
+    }
+  }
+}
+```
+
+### Binding
+
+If you're using Java with Lagom's Guice backend, then nothing more needs to be done, The `lagom-javadsl-akka-discovery` module provides a Guice module that is automatically loaded, which provides the service locator implementation.
+
+If however you're using Scala, you will need to wire in the service locator yourself. To do this, modify your production application cake to mix the Akka discovery service locator components in, by opening `com/example/shoppingcart/impl/ShoppingCartLoader.scala` in `shopping-cart-impl/src/main/scala`, and modifying the `load` method:
+
+```scala
+import com.lightbend.lagom.scaladsl.akkadiscovery.AkkaDiscoveryComponents
+
+override def load(context: LagomApplicationContext): LagomApplication =
+    new ShoppingCartApplication(context) with AkkaDiscoveryComponents
+```
+
+## Forming an Akka cluster
+
+The last thing to configure is the Akka cluster formation, which we will detail on the next page of this guide.
 
