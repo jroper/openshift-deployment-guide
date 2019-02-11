@@ -66,7 +66,9 @@ akka {
 
 Akka management HTTP provides an HTTP API for querying the status of the Akka cluster, used both by the bootstrap process, as well as healthchecks to ensure requests don't get routed to your pods until the pods have joined the cluster.
 
-The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address. It will also expose liveness and readiness health checks on `/alive` and `/ready` respectively, and included in the readiness check will be a check to ensure that a cluster has been formed.
+The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address.
+
+It will also expose liveness and readiness health checks on `/alive` and `/ready` respectively, and included in the readiness check will be a check to ensure that a cluster has been formed. In Kubernetes, if an application is live, it means its running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or in our case, it may not have formed a cluster yet. By separating liveness and readiness, Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
 
 ### Cluster bootstrap
 
@@ -100,23 +102,103 @@ A few things to note:
 <!--- #deployment-spec --->
 ## Updating the deployment spec
 
-### RBAC
+### Role-Based Access Control
 
-* Briefly explain RBAC, why it's needed, and show YAML
+By default, pods are unable to use the Kubernetes API, as Akka Cluster Bootstrap needs to, because they are not authenticated to do so. In order to allow the applications pods to use the Kubernetes API, we need to define some Role-Based Access Control (RBAC) roles and bindings.
+
+RBAC allows the configuration of access control using two key concepts, roles, and role bindings. A role is a set of permissions to access something in the Kubernetes API. For example, a `pod-reader` role may have permission to perform the `list`, `get` and `watch` operations on the `pods` resource in a particular namespace, by default he same namespace the role is configured in. In fact, that's exactly what we are going to configure, as this is the permission that our pods need. Here's the spec for the `pod-reader` role:
+
+```yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+```
+
+Having configured a role, you can then bind that role to a subject. A subject is typically either a user or a group, and a user may be a human user, or it could be a service account. A service account is an account created by Kubernetes for Kubernetes resources to access the Kubernetes API. Each namespace has a default service account that is used by default by pods that don't explicitly declare a service account, otherwise, you can define your own service accounts. Kubernetes automatically injects the credentials of a pods service account into that pods filesystem, allowing the pod to use them to make authenticated requests on the Kubernetes API.
+
+Since we are just using the default service account, we need to bind our role to the default service account so that our pod will be able to access the Kubernetes API as a `pod-reader`:
+
+```yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-pods
+subjects:
+- kind: User
+  name: system:serviceaccount:myproject:default
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+Note service account name, `system:serviceaccount:myproject:default`, contains the `myproject` namespace in it. If you are using a different namespace, you'll need to update it accordingly.
+
+#### A note on secrets with RBAC
+
+One thing to be aware of when using role based access control, the `pod-reader` role is going to grant access to read all pods in the `myproject` namespace, not just the pods for your application. This includes the deployment specs, which includes the environment variables that are hard coded in the deployment specs. If you pass secrets through those environment variables, rather than using the Kubernetes secrets API, then your application, and every other app that uses the default service account, will be able to see these secrets. This is a good reason why you should never pass secrets in deployment specs, rather, you should pass them through the Kubernetes secrets API.
+
+If this is a concern, one solution might be to create a separate namespace for each application you wish to deploy. You may find the configuration overhead of doing this very high though, it's not what Kubernetes namespaces are intended to be used for.
 
 ### Replicas and contact points
 
-* Show configuring replicas and contact points environment variable
+In the @ref:[cluster bootstrap configuration section](#cluster-bootstrap), we used a `REQUIRED_CONTACT_POINT_NR` environment variable. Let's configure that now in our spec. It needs to match the number of replicas that we're going to deploy. If you're really strapped for resources in your cluster, you might set this to one, but for the purposes of this demo we strongly recommend that you set it to 3 or more to see an Akka cluster form.
 
-### Namespace
+In the deployment spec, set the replicas to 3:
 
-* Show how to pass the namespace
+@@@vars
+```yaml
+apiVersion: "apps/v1beta2"
+kind: Deployment
+metadata:
+  name: $service.name$
+  labels:
+    app: $service.name$
+spec:
+  replicas: 3
+```
+@@@
+
+Now down in the environment variables section, add the `REQUIRED_CONTACT_POINT_NR` environment variable to match:
+
+```yaml
+- name: REQUIRED_CONTACT_POINT_NR
+  value: "3"
+```
 
 ### Management port configuration
 
-* Show defining the management port
+In the @ref:[cluster bootstrap configuration section](#cluster-bootstrap), we configured the `pod-port-name` to be `management`. The Kubernetes API cluster bootstrap discovery is going to look for a port declared by the pod called `management`, to know which port to use to speak to Akka HTTP management, so we need to declare that in the `ports` section of the pod spec:
+
+```yaml
+ports:
+  - name: management
+    containerPort: 8558
+```
 
 ### Health checks
 
-* Show health check configuration
+Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. In addition, we'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: "/ready"
+    port: management
+  periodSeconds: 10
+  failureThreshold: 10
+  initialDelaySeconds: 20
+livenessProbe:
+  httpGet:
+    path: "/alive"
+    port: management
+  periodSeconds: 10
+  failureThreshold: 10
+  initialDelaySeconds: 20
+```
 <!--- #deployment-spec --->
