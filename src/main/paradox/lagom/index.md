@@ -11,14 +11,13 @@ The shopping cart sample application can be cloned from the following GitHub rep
 
 Before you proceed, it is strongly recommended that you clone the repository, read the README, familiarise yourself with the code, and run it in development to get an understanding for what the sample app is and what it does.
 
-@@toc { depth=1 }
+@@toc { depth=2 }
 
 @@@ index
 
 * [Deploying Postgres](deploying-postgres.md)
 * [Deploying Kafka](deploying-kafka.md)
 * [Preparing for production](preparing-for-production.md)
-* [Forming a cluster](forming-a-cluster.md)
-* [Deploying using sbt](deploying-using-sbt.md)
+* [Deploying the application](deploying-using-sbt.md)
 
 @@@

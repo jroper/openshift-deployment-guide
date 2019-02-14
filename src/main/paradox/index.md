@@ -68,4 +68,4 @@ The first command modifies your `PATH` to ensure the `oc` binary is on it, the s
 
 @@@
 
-@@toc { depth=1 }
+@@toc { depth=3 }

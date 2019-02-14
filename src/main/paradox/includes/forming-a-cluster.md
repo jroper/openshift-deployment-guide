@@ -19,7 +19,7 @@ sbt
 ```scala
 libraryDependencies ++= Seq(
   "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % "$akka.management.version$",
-  "com.lightbend.akka.management" %% "akka-discovery-kubernetes-api" % "$akka.management.version$"
+  "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % "$akka.management.version$"
 )
 ```
 @@@
@@ -97,7 +97,13 @@ A few things to note:
 
 ## Starting
 
-* Show code to start management and cluster bootstrap
+To ensure that cluster bootstrap is started, both the cluster bootstrap and the Akka Management extensions must be started. This can be done by invoking the `start` method on both the `ClusterBoostrap` and `AkkaManagement` extensions when your application starts up.
+
+Scala
+:   @@snip [Example.scala](code/FormingACluster.scala) { #start }
+
+Java
+:   @@snip [Example.java](code/jdocs/includes/FormingACluster.java) { #start }
 
 <!--- #deployment-spec --->
 ## Updating the deployment spec

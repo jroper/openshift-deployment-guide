@@ -183,7 +183,7 @@ Java with Maven
 ```xml
 <dependency>
   <groupId>com.lightbend.lagom</groupId>
-  <artifactId>lagom-javadsl-akka-discovery</artifactId>
+  <artifactId>lagom-javadsl-akka-discovery-service-locator_2.12</artifactId>
   <version>$lagom.akka.discovery.version$</version>
 </dependency>
 ```
@@ -193,15 +193,17 @@ Java with sbt
 : @@@vars
 ```scala
 libraryDependencies += 
-  "com.lightbend.lagom" %% "lagom-javadsl-akka-discovery" % "$lagom.akka.discovery.version$"
+  "com.lightbend.lagom" %% "lagom-javadsl-akka-discovery-service-locator" % "$lagom.akka.discovery.version$"
 ```
+@@@
 
 Scala with sbt
 : @@@vars
 ```scala
 libraryDependencies += 
-  "com.lightbend.lagom" %% "lagom-scaladsl-akka-discovery" % "$lagom.akka.discovery.version$"
+  "com.lightbend.lagom" %% "lagom-scaladsl-akka-discovery-service-locator" % "$lagom.akka.discovery.version$"
 ```
+@@@
 
 ### Configuration
 
@@ -237,7 +239,9 @@ override def load(context: LagomApplicationContext): LagomApplication =
     new ShoppingCartApplication(context) with AkkaDiscoveryComponents
 ```
 
-## Forming an Akka cluster
+@@@ index
 
-The last thing to configure is the Akka cluster formation, which we will detail on the next page of this guide.
+* [Forming an Akka cluster](forming-a-cluster.md)
+
+@@@
 
