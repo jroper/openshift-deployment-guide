@@ -1,4 +1,4 @@
-# Deploying using sbt
+# Building using sbt
 
 sbt uses a plugin called [sbt-native-packager](https://www.scala-sbt.org/sbt-native-packager/) to allow conveniently packaging Java and Scala applications built using sbt as Docker images.
 

@@ -18,6 +18,7 @@ Before you proceed, it is strongly recommended that you clone the repository, re
 * [Deploying Postgres](deploying-postgres.md)
 * [Deploying Kafka](deploying-kafka.md)
 * [Preparing for production](preparing-for-production.md)
-* [Deploying the application](deploying-using-sbt.md)
+* [Building the application](building.md)
+* [Deploying the application](deploying.md)
 
 @@@
