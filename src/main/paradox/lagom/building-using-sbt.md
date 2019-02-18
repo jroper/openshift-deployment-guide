@@ -1,6 +1,6 @@
 ---
-sbt.prompt: [online-auction] $
-sbt.sub.project: bidding-impl
+sbt.prompt: [shopping-cart] $
+sbt.sub.project: shopping-cart-impl
 ---
 # Building using sbt
 

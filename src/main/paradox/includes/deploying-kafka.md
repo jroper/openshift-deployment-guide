@@ -132,7 +132,10 @@ oc get services -n myproject
 This should show at least:
 
 ```
-TODO
+strimzi-kafka-bootstrap    ClusterIP   172.30.231.126   <none>        9091/TCP,9092/TCP,9093/TCP,9404/TCP   2m
+strimzi-kafka-brokers      ClusterIP   None             <none>        9091/TCP,9092/TCP,9093/TCP            2m
+strimzi-zookeeper-client   ClusterIP   172.30.226.168   <none>        9404/TCP,2181/TCP                     3m
+strimzi-zookeeper-nodes    ClusterIP   None             <none>        2181/TCP,2888/TCP,3888/TCP            3m
 ```
 
 As you can see, there is a service called `strimzi-kafka-brokers`, this is the service that Kafka clients are going to connect to.
@@ -140,5 +143,5 @@ As you can see, there is a service called `strimzi-kafka-brokers`, this is the s
 Once Kafka is deployed and running, you no longer need to be logged in as an administrator, so log back in as your old user. If using Minishift, that means logging in as the developer user:
 
 ```sh
-oc login -u developer:developer
+oc login -u developer
 ```

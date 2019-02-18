@@ -211,18 +211,8 @@ Now let's configure Akka discovery to use the asynchronous DNS implementation, b
 
 ```
 akka {
-
   discovery.method = akka-dns
-
-  io.dns {
-    resolver = async-dns
-    # TODO is all this needed?
-    async-dns {
-      provider-object = "akka.io.dns.internal.AsyncDnsProvider"
-      resolve-srv = true
-      resolv-conf = on
-    }
-  }
+  io.dns.resolver = async-dns
 }
 ```
 

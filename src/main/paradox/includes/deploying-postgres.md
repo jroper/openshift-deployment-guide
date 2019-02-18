@@ -1,3 +1,5 @@
+## Deployment topology
+
 Before we talk about how to deploy Postgres, we first need to decide how we're going to structure our databases. Microservices should have isolated data stores, that is to say, they should not share the same database tables, and ideally, this should be enforced. To implement this with Postgres, there are three different levels of isolation.
 
 1. One database server per service - this is the highest level of isolation. In this setup, a new Postgres pod is deployed for each service that needs it. This pod can be sized exactly according to the services needs, and it shares no resources, CPU or memory, with Postgres pods for other services, and so is completely isolated.
@@ -25,13 +27,33 @@ oc new-app postgresql -e POSTGRESQL_ADMIN_PASSWORD=<postgres-admin-password>
 ```
 
 @@@warning
-This places the PostgreSQL admin password in an environment variable, which is not safe, it is much better to put it in a Kubernetes secret. Unfortunately, the `oc new-app` command [does not allow](https://github.com/openshift/origin/issues/21619) configuring Kubernetes secrets when creating a new app in this way. When going to production, we recommend placing the password in a Kubernetes secret, and then reconfiguring the service after the fact to use the secret rather than placing the password directly in the spec.
+This places the PostgreSQL admin password in an environment variable, which is not safe, it is much better to put it in a Kubernetes secret. Unfortunately, the `oc new-app` command [does not allow](https://github.com/openshift/origin/issues/21619) configuring Kubernetes secrets when creating a new app in this way. When going to production, we recommend placing the password in a Kubernetes secret, and then reconfiguring the service after the fact to use the secret rather than placing the password directly in the spec. Reconfiguring is described below.
 @@@
 
 Now we can watch the pods to see the `postgresql` pod created:
 
 ```sh
 oc get pods -w
+```
+
+### Reconfigure secrets
+
+Now we'll add the secret to the Kubernetes secret API, and reconfigure the deployment config to consume it from that, so that the admin password secret doesn't appear in the spec for the service. First, create the secret:
+
+```sh
+oc create secret generic postgresql-admin-password --from-literal=password="<postgres-admin-password>"
+```
+
+Now patch the deployment config just created to use the admin password configured in the service.
+
+```sh
+oc patch deploymentconfig postgresql --patch '{"spec": {"template": {"spec": {"containers": [
+  {"name": "postgresql", "env": [
+    {"name": "POSTGRESQL_ADMIN_PASSWORD", "value": null, "valueFrom": 
+      {"secretKeyRef": {"name": "postgresql-admin-password", "key": "password"}}
+    }
+  ]}
+]}}}}'
 ```
 
 ### Creating the Postgres database
@@ -78,11 +100,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 ```
 @@@
 
-We've now setup the database, we now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
+Once the schema has been created, you can exit `psql` and terminate the port forwarding session in the other window by hitting Ctrl+c. We now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
 
 @@@vars
 ```sh
-oc create secret generic $database.secret$ --from-literal=username=$database.user$ --from-literal=password="<pstogres-user-password>"
+oc create secret generic $database.secret$ --from-literal=username=$database.user$ --from-literal=password="<postgres-user-password>"
 ```
 @@@
 
