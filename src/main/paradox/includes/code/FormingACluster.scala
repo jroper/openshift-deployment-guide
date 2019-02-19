@@ -7,7 +7,7 @@ object StartClusterBootStrap {
   val actorSystem = ActorSystem()
 
   // #start
-  import akka.management.AkkaManagement
+  import akka.management.scaladsl.AkkaManagement
   import akka.management.cluster.bootstrap.ClusterBootstrap
 
   AkkaManagement(actorSystem).start()

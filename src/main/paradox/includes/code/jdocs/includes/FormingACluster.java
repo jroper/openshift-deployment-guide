@@ -2,7 +2,7 @@ package jdocs.includes;
 
 import akka.actor.ActorSystem;
 // #start
-import akka.management.AkkaManagement;
+import akka.management.javadsl.AkkaManagement;
 import akka.management.cluster.bootstrap.ClusterBootstrap;
 // #start
 
