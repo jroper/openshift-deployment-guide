@@ -6,7 +6,7 @@ When deploying Kafka to production, we strongly recommend that you read the [ful
 
 ## Installing Strimzi
 
-To install Strimzi, you need to be logged in as a cluster administrator. If using Minishift, the admin username and password is `system:admin`, so you can log in using the following command:
+To install the Strimzi cluster operator, you need to be logged in as a cluster administrator. If using Minishift, you can log in using the following command:
 
 ```sh
 oc login -u system:admin

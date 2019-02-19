@@ -4,7 +4,7 @@ name := "lightbend-openshift-guide"
 
 val akkaManagementVersion = "1.0.0-RC2"
 val lagomAkkaDiscoveryVersion = "0.0.12"
-val lagomVersion = "1.4.1"
+val lagomVersion = "1.4.11"
 
 paradoxProperties ++= Map(
   "akka.management.version" -> akkaManagementVersion,

@@ -1,6 +1,5 @@
 package sdocs.lagom
 
-import com.lightbend.lagom.scaladsl.akka.discovery.AkkaDiscoveryComponents
 import com.lightbend.lagom.scaladsl.api.{Descriptor, Service}
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.server.{LagomApplication, LagomApplicationContext, LagomApplicationLoader, LagomServer}
@@ -11,7 +10,7 @@ object StartClusterBootstrap {
   class ShoppingCartLoader extends LagomApplicationLoader {
 
     //#start
-    import akka.management.AkkaManagement
+    import akka.management.scaladsl.AkkaManagement
     import akka.management.cluster.bootstrap.ClusterBootstrap
     import com.lightbend.lagom.scaladsl.akka.discovery.AkkaDiscoveryComponents
 
