@@ -19,6 +19,7 @@ sbt
 ```scala
 libraryDependencies ++= Seq(
   "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % "$akka.management.version$",
+  "com.lightbend.akka.management" %% "akka-management-cluster-http" % "$akka.management.version$",
   "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % "$akka.management.version$"
 )
 ```
@@ -30,6 +31,11 @@ Maven
 <dependency>
   <groupId>com.lightbend.akka.management</groupId>
   <artifactId>akka-management-cluster-bootstrap_2.12</artifactId>
+  <version>$akka.management.version$</version>
+</dependency>
+<dependency>
+  <groupId>com.lightbend.akka.management</groupId>
+  <artifactId>akka-management-cluster-http_2.12</artifactId>
   <version>$akka.management.version$</version>
 </dependency>
 <dependency>
@@ -78,16 +84,19 @@ Hence, we need to use a different discovery method for cluster bootstrap, and fo
 
 @@@vars
 ```
-akka.management.cluster.bootstrap {
-  contact-point-discovery {
-    discovery-method = kubernetes-api
-    service-name = "$service.name$"
-    required-contact-point-nr = ${REQUIRED_CONTACT_POINT_NR}
-    kubernetes-api {
-      pod-port-name = management
-      pod-label-selector = "app=%s"
+akka.management {
+  cluster.bootstrap {
+    contact-point-discovery {
+      discovery-method = kubernetes-api
+      service-name = "$service.name$"
+      required-contact-point-nr = ${REQUIRED_CONTACT_POINT_NR}
+      kubernetes-api {
+        pod-port-name = management
+        pod-label-selector = "app=%s"
+      }
     }
   }
+  http.route-providers += akka.management.HealthCheckRoutes
 }
 ```
 @@@
