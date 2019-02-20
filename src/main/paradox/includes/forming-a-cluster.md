@@ -39,7 +39,7 @@ Maven
   <version>$akka.management.version$</version>
 </dependency>
 <dependency>
-  <groupId>com.lightbend.akka.management</groupId>
+  <groupId>com.lightbend.akka.discovery</groupId>
   <artifactId>akka-discovery-kubernetes-api_2.12</artifactId>
   <version>$akka.management.version$</version>
 </dependency>

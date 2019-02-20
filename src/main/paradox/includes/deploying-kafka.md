@@ -2,7 +2,7 @@ Kafka is relatively difficult to install. You need to install ZooKeeper, which K
 
 Fortunately, Kubernetes provides a mechanism for capturing the operational concerns of difficult deployments like this, using a feature called operators. An operator is able to encode how to provision and configure deployments, providing high level features to scale them up and down, allowing backups, and so on, allowing you as the end user to deploy the components the operator manages with minimal effort. [Strimzi](https://strimzi.io/) is an open source project that provides an operator for Kafka.
 
-When deploying Kafka to production, we strongly recommend that you read the [full Strimzi documentation](https://strimzi.io/docs/latest/), since there are a lot of considerations that you need to take into account when deploying Kafka. This guide is just a quick start for getting it running in a very minimal configuration.
+[Lightbend](https://www.lightbend.com) provides a [commercially supported](https://www.lightbend.com/lightbend-platform) Strimzi installation, we recommend when going to production that you use that. This guide provides a means to deploy Kafka as quickly and simply as possible for evaluation purposes, it won't give you a robust production setup.
 
 ## Installing Strimzi
 
@@ -28,7 +28,7 @@ At this point, nothing has actually been deployed other than the operator. With 
 
 ## Deploying Kafka
 
-If you're deploying to a real cluster with many physical machines, then it's best to deploy Kafka with at least three ZooKeeper nodes and three Kafka nodes. Here's a spec that will let you do that:
+If you're deploying to a real cluster with many physical machines, then it's best to deploy with three Kafka nodes to get a realistic production setup. The spec below deploys three Kafka nodes, one ZooKeeper node, and uses ephemeral storage (so if your nodes are destroyed, they lose their data).
 
 ```yaml
 apiVersion: kafka.strimzi.io/v1alpha1
@@ -46,15 +46,11 @@ spec:
       transaction.state.log.replication.factor: 3
       transaction.state.log.min.isr: 2
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: false
+      type: ephemeral
   zookeeper:
-    replicas: 3
+    replicas: 1
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: false
+      type: ephemeral
   entityOperator:
     topicOperator: {}
     userOperator: {}
@@ -75,7 +71,7 @@ metadata:
   name: strimzi
 spec:
   kafka:
-    replicas: 1
+    replicas: 3
     listeners:
       plain: {}
       tls: {}
@@ -84,15 +80,11 @@ spec:
       transaction.state.log.replication.factor: 1
       transaction.state.log.min.isr: 1
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: false
+      type: ephemeral
   zookeeper:
     replicas: 1
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: false
+      type: ephemeral
   entityOperator:
     topicOperator: {}
     userOperator: {}
@@ -118,8 +110,6 @@ strimzi-kafka-0                            2/2     Running   1          91s
 strimzi-kafka-1                            2/2     Running   1          91s
 strimzi-kafka-2                            2/2     Running   1          91s
 strimzi-zookeeper-0                        2/2     Running   0          2m30s
-strimzi-zookeeper-1                        2/2     Running   0          2m30s
-strimzi-zookeeper-2                        2/2     Running   0          2m30s
 strimzi-cluster-operator-78f8bf857-kpmhb   1/1     Running   0          3m10s
 ```
 
