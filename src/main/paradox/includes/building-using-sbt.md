@@ -43,12 +43,12 @@ dockerBaseImage := "adoptopenjdk/openjdk8:$adoptopenjdk.docker.image.version$"
 ```
 @@@
 
-## Deploying
+## Building the docker image
 
-Now that we're setup, we can deploy our application.
+Now that we're setup, we can build our docker image.
 
 @@@ note { title=Remember }
-Before doing this, ensure you have your `DOCKER_HOST` environment variable and authentication setup, as described in @ref:[Installing OpenShift](../index.md#installing-openshift). In Minishift, this means running:
+If you are using Minishift, ensure you have setup your docker environment as described in @ref:[Installing Minishift](../index.md#installing-minishiftshift). This means running:
 
 ```
 eval $(minishift docker-env)
@@ -73,4 +73,5 @@ $sbt.prompt$ $sbt.sub.project$/docker:publishLocal
 ```
 @@@
 
+@@include[docker-push.md](docker-push.md)
 <!--- #no-setup --->

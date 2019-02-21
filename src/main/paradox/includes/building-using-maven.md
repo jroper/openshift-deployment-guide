@@ -68,3 +68,23 @@ Now that we've configured the plugin build wide, we can modify our individual se
 @@@
 
 As you can see, now we're overriding the `skip` configuration from the parent POM. We've also configured the startup command to run our application.
+
+## Building the docker image
+
+Now that we're setup, we can build our docker image.
+
+@@@ note { title=Remember }
+If you are using Minishift, ensure you have setup your docker environment as described in @ref:[Installing Minishift](../index.md#installing-minishiftshift). This means running:
+
+```
+eval $(minishift docker-env)
+```
+@@@
+
+We need to first package the application jars (and its dependencies), and then we can build the image:
+
+```
+mvn package docker:build
+```
+
+@@include[docker-push.md](docker-push.md)

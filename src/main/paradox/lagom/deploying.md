@@ -15,6 +15,13 @@ oc apply -f $spec.path$
 ```
 @@@
 
+@@@note
+If you haven't been creating the files as you go for the guide, but rather are relying on the existing files distributed with the sample app, make sure you have performed the following easy to miss steps:
+
+* The $spec.path$ `RoleBinding` spec @ref[needs to have the namespace updated](forming-a-cluster.md#role-based-access-control) for the user name if you are not using the `myproject` namespace.
+* You need to have @ref[created the application secret](preparing-for-production.md#application-secret).
+@@@
+
 Immediately after running this, you should see the three shopping cart pods when you run `oc get pods`:
 
 @@@vars
@@ -171,8 +178,16 @@ $ curl http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123/ch
 
 At this point, the shopping cart service should publish a message to Kafka. Let's deploy the inventory service to consume that message. We won't go into the details of how to configure it and its deployment descriptor since it's just a subset of what's needed for the shopping cart service - it doesn't need to form a cluster, it doesn't have a database, it just has a single node and needs to connect to Kafka. First, if you haven't already, build and push the inventory service to the docker registry:
 
+sbt
+:
 ```
 sbt inventory-impl/docker:publishLocal
+```
+
+Maven
+:
+```
+mvn package docker:build
 ```
 
 Now, we can create the application secret, apply the deployment spec, and expose the service:

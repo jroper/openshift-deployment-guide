@@ -27,7 +27,9 @@ If you wish to install a full OpenShift cluster from scratch, you can follow one
 
 In this guide, we will assume that you have created a project/namespace called `myproject`, and will use this as the default namespace that all applications get deployed to. You can either create this project yourself, or use a different project, but be careful to ensure that all commands and configuration files that reference `myproject` are updated to use the project you create.
 
-You will need to ensure that you set your environment up to be able to push docker images to your OpenShift installation. This requires exposing your OpenShift installations internal registry to the outside world, logging in, and then setting the `DOCKER_HOST` environment variable to your OpenShift docker registries hostname or IP address. For more information, see [here](https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#accessing-the-internal-registry) and [here](https://blog.openshift.com/remotely-push-pull-container-images-openshift/).
+#### Setting up docker
+
+You will need to ensure that you set your environment up to be able to push docker images to your OpenShift installation. This requires exposing your OpenShift installations internal registry to the outside world and then logging in. For more information, see [here](https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#accessing-the-internal-registry) and [here](https://blog.openshift.com/remotely-push-pull-container-images-openshift/).
 
 ### Installing Minishift
 
@@ -60,7 +62,7 @@ eval $(minishift oc-env)
 eval $(minishift docker-env)
 ```
 
-The first command modifies your `PATH` to ensure the `oc` binary is on it, the second sets some `DOCKER_*` environment variables to tell Docker which host to use and how to authenticate with it when pushing images. These commands will need to be rerun every time you open a new terminal window, or any time you delete and then restart your Minishift instance.
+The first command modifies your `PATH` to ensure the `oc` binary is on it, the second sets some `DOCKER_*` environment variables to tell Docker which host to use and how to authenticate with it when building images. These commands will need to be rerun every time you open a new terminal window, or any time you delete and then restart your Minishift instance.
 
 @@@ index
 

@@ -26,7 +26,7 @@ Be careful to ensure that the `myproject` project matches the OpenShift project 
 
 At this point, nothing has actually been deployed other than the operator. With the operator installed, we're ready to deploy a Kafka instance.
 
-## Deploying Kafka
+## Deploying a Kafka instance
 
 If you're deploying to a real cluster with many physical machines, then it's best to deploy with three Kafka nodes to get a realistic production setup. The spec below deploys three Kafka nodes, one ZooKeeper node, and uses ephemeral storage (so if your nodes are destroyed, they lose their data).
 
