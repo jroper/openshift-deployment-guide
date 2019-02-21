@@ -3,10 +3,10 @@
 If you are using Minishift with the Minishift docker environment set up, then you will have just built the image directly in the OpenShift docker registry, and no further steps are needed. Otherwise, you will need to now push the image to the OpenShift repository.
 
 @@@ note { title=Remember }
-Before doing this, ensure that your OpenShift instance has exposed its Docker registry, and that you have logged in to the remote Docker registry, as described in @ref:[Setting up docker](../index.md#setting-up-docker)
+Before doing this, ensure that your OpenShift instance has exposed its docker registry, and that you have logged in to the remote docker registry, as described in @ref:[Setting up docker](../index.md#setting-up-docker)
 @@@
 
-OpenShift will only allow you to push images to projects that you have permission on. Before you push, you first need to tag your image such that it matches the OpenShift Docker repository and project path. Assuming your docker repository is `docker-registry-default.myopenshift.example.com`, and that your project is `myproject`, you can tag your image like so:
+OpenShift will only allow you to push images to projects that you have permission on. Before you push, you first need to tag your image such that it matches the OpenShift docker repository and project path. Assuming your docker repository is `docker-registry-default.myopenshift.example.com`, and that your project is `myproject`, you can tag your image like so:
 
 @@@vars
 ```

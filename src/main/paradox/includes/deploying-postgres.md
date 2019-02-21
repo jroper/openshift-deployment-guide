@@ -57,7 +57,7 @@ oc patch deploymentconfig postgresql --patch '{"spec": {"template": {"spec": {"c
 
 ### Creating the Postgres database
 
-To create our database, we'll need to access Postgres. There are two ways to do this, the first is to using port forwarding, where you open a port on your local machine, and then use the `psql` client installed on your local machine to connect to it. The second is to shell into the Postgres pod using `oc rsh`, and use the `psql` client installed on the pod to connect to Postgres. The first approach is a little simpler, since the `psql` client on your local machine can access SQL scripts locally on your machine, whereas to run a script when you shell into the pod, you will first need to copy the script there using `oc rsync`.
+To create our database, we'll need to access Postgres. There are two ways to do this, the first is using port forwarding, where you open a port on your local machine, and then use the `psql` client installed on your local machine to connect to it. The second is to shell into the Postgres pod using `oc rsh`, and use the `psql` client installed on the pod to connect to Postgres. The first approach is a little simpler, since the `psql` client on your local machine can access SQL scripts locally on your machine, whereas to run a script when you shell into the pod, you will first need to copy the script there using `oc rsync`.
 
 You will need two terminal windows to use the port forwarding approach. First, start the port forward:
 
@@ -90,6 +90,7 @@ CREATE USER $database.user$ WITH PASSWORD '$POSTGRES_USER_PASSWORD';
 GRANT CONNECT ON DATABASE $database.user$ TO $database.name$;
 
 \connect $database.name$;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $database.user$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public

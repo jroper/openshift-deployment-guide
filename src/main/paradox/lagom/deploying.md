@@ -84,7 +84,7 @@ An explanation of these messages is as follows.
 6. This log message shows what cluster bootstrap has decided to do with the three services. It has found three, but so far it has not confirmed whether any of them have joined a cluster yet, hence, it will continue retrying looking them up, and attempting to contact them, until it has found that a cluster has been, or can be started.
 7. This message will appear many times, it's the result of probing one of the contact points to find out if it has formed a cluster.
 8. This message will also appear many times, it's the result of this pod being probed by another pod to find out if it has formed a cluster.
-9. This message may or may not appear, depending on how fast your pods are able to start given the amount of resources. It's simply informing you that the pod hasn't located a seed node yet, but it's not going to try and form a cluster since it not the pod with the lowest IP address.
+9. This message may or may not appear, depending on how fast your pods are able to start given the amount of resources. It's simply informing you that the pod hasn't located a seed node yet, but it's not going to try and form a cluster since it's not the pod with the lowest IP address.
 10. Eventually, this message will change to report that one of the pods has formed a cluster.
 11. The pod has decided to join an existing cluster.
 12. The pod has joined the cluster.
@@ -105,7 +105,7 @@ This message will appear after a timeout called the stable margin, which default
 If your cluster is failing to form, carefully check over the logs for the following things:
 
 * Make sure the right IP addresses are in use. If you see `localhost` or `127.0.0.1` used anywhere, that is generally an indication of a misconfiguration.
-* Ensure that the namespace, service name, label selector, port name and protocol matches your deployment spec.
+* Ensure that the namespace, service name, label selector, port name and protocol all match your deployment spec.
 * Ensure that the port numbers match what you've configured both in the configuration files and in your deployment spec.
 * Ensure that the required contact point number matches your configuration and the number of replicas you have deployed.
 * Ensure that pods are successfully polling each other, looking for messages such as `Contact point [...] returned...` for outgoing polls and `Bootstrap request from ...` for incoming polls from other pods.
@@ -122,7 +122,7 @@ $service.name$-756894d68d-d8h5j         1/1       Running   0          9s
 ```
 @@@
 
-Now you can interact with the service. First we need to expose it to the outside world. We can do this using the `oc expose` command. If running on Minishift, there's no need to tell it what IP address or host name to expose the service on, Minishift will generate one for you:
+Now you can interact with the service. First we need to expose it to the outside world. We can do this using the `oc expose` command.
 
 @@@vars
 ```
@@ -138,7 +138,7 @@ $ oc get routes/$service.name$
 ```
 @@@
 
-You should see this:
+You should see something like this:
 
 @@@vars
 ```
@@ -146,7 +146,7 @@ $service.name$   $service.name$-myproject.192.168.42.246.nip.io  $service.name$ 
 ```
 @@@
 
-You can use the hostname to connect to the service, let's try that:
+If you're using Minishift, your hostname will contain a domain name like `192.168.42.246.nip.io`, but not exactly the same as the Minishift IP address is selected at random on startup. Otherwise, it will be the domain name that your OpenShift cluster is running on. You can use the above hostname to connect to the service, let's try that:
 
 @@@vars
 ```
@@ -215,4 +215,4 @@ And use that to query the inventory of one of the products that we just checked 
 curl http://$INVENTORY_HOST/inventory/456
 ```
 
-Since we checked out two of product `456`, and we haven't added anything to its inventory, if the inventory service has successfully consumed the checkout message, we expect the current inventory to be -2.
+Since earlier we added two of product `456` to our shopping cart, and we haven't added anything to the inventory for that product id, if the inventory service has successfully consumed the checkout message, we expect the current inventory to be -2.

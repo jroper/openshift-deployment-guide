@@ -62,7 +62,7 @@ To deploy this, create a file called `kafka.yaml`, and run:
 oc apply -f kafka.yaml -n myproject
 ```
 
-If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, you're machine has no resources left for anything else. So instead we'll use a spec that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
+If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, your machine has no resources left for anything else, such as your application, to use. So instead we'll use a spec that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
 
 ```yaml
 apiVersion: kafka.strimzi.io/v1alpha1

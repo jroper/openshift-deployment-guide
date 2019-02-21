@@ -63,7 +63,7 @@ $sbt.prompt$ docker:publishLocal
 ```
 @@@
 
-This will publish all projects for which you have sbt native packager enabled to the OpenShift docker repository. The first time you run this it may take some time as it downloads the docker base image to the OpenShift docker repository, but subsequent runs will be fast.
+This will publish all projects for which you have sbt native packager enabled to your docker repository. The first time you run this it may take some time as it downloads the docker base image layers to your repository, but subsequent runs will be fast.
 
 If you have multiple projects, then you may wish to deploy just one of those projects, this can be done like so:
 

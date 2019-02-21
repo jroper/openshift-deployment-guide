@@ -9,7 +9,7 @@ The shopping cart sample application can be cloned from the following GitHub rep
 * **Java**: https://github.com/lagom/shopping-cart-java
 * **Scala**: https://github.com/lagom/shopping-cart-scala
 
-Before you proceed, it is strongly recommended that you clone the repository, read the README, familiarise yourself with the code, and run it in development to get an understanding for what the sample app is and what it does.
+Before you proceed, it is strongly recommended that you clone the repository, read the README, familiarise yourself with the code, and run it in development to get an understanding for what the sample app is and what it does. This will help put more context around the rest of the guide.
 
 @@toc { depth=2 }
 

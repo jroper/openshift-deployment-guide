@@ -36,6 +36,16 @@ CREATE TABLE IF NOT EXISTS snapshot (
 );
 ```
 
+In addition, Lagom also needs an offset table, which is used to track the progress of read side processors and Kafka publishers through the event log. That table looks like this:
+
+```sql
+CREATE TABLE read_side_offsets (
+  read_side_id VARCHAR(255), tag VARCHAR(255),
+  sequence_offset bigint, time_uuid_offset char(36),
+  PRIMARY KEY (read_side_id, tag)
+)
+```
+
 You can find this schema already saved in the project, in `schemas/shopping-cart.sql`. We'll load this script using the `psql` client when we come to create the schema.
 
 @@include[deploying-postgres.md](../includes/deploying-postgres.md)

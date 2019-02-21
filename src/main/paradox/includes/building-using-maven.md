@@ -87,4 +87,6 @@ We need to first package the application jars (and its dependencies), and then w
 mvn package docker:build
 ```
 
+This will publish all projects for which you have enabled the `docker-maven-plugin` to your docker registry. The first time you run this it may take some time as it downloads the docker base image layers to your repository, but subsequent runs will be fast.
+
 @@include[docker-push.md](docker-push.md)
