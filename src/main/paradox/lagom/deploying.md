@@ -155,40 +155,43 @@ $ curl http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123
 ```
 @@@
 
-Let's try adding some items to the shopping cart:
+For convenience, let's place the hostname in an environment variable, which will then allow the remainder of the curl commands to be copied and pasted into your terminal as is.
 
 @@@vars
 ```
-$ curl -H "Content-Type: application/json" -X POST -d '{"productId": "456", "quantity": 2}' \
-  http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123
-$ curl -H "Content-Type: application/json" -X POST -d '{"productId": "789", "quantity": 3}' \
-  http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123
-$ curl http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123
-{"id":"123","items":[{"productId":"456","quantity":2},{"productId":"789","quantity":3}],"checkedOut":false}
+$ SHOPPING_CART_HOST=$service.name$-myproject.192.168.42.246.nip.io
 ```
 @@@
+
+Now let's try adding some items to the shopping cart:
+
+```
+curl -H "Content-Type: application/json" -X POST -d '{"productId": "456", "quantity": 2}' \
+ http://$SHOPPING_CART_HOST/shoppingcart/123
+curl -H "Content-Type: application/json" -X POST -d '{"productId": "789", "quantity": 3}' \
+ http://$SHOPPING_CART_HOST/shoppingcart/123
+curl http://$SHOPPING_CART_HOST/shoppingcart/123
+```
 
 Finally, let's checkout the shopping cart
 
-@@@vars
 ```
-$ curl http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123/checkout -X POST
+$ curl http://$SHOPPING_CART_HOST/shoppingcart/123/checkout -X POST
 ```
-@@@
 
 At this point, the shopping cart service should publish a message to Kafka. Let's deploy the inventory service to consume that message. We won't go into the details of how to configure it and its deployment descriptor since it's just a subset of what's needed for the shopping cart service - it doesn't need to form a cluster, it doesn't have a database, it just has a single node and needs to connect to Kafka. First, if you haven't already, build and push the inventory service to the docker registry:
 
 sbt
-:
-```
+:    ```
 sbt inventory-impl/docker:publishLocal
 ```
 
 Maven
-:
-```
+:    ```
 mvn package docker:build
 ```
+
+If you're not using Minishift, you'll now need to push the docker image as described for @ref[sbt](building-using-sbt.md#pushing-the-docker-image) and @ref[Maven](building-using-maven.md#pushing-the-docker-image).
 
 Now, we can create the application secret, apply the deployment spec, and expose the service:
 
@@ -198,17 +201,18 @@ oc apply -f deploy/inventory.yaml
 oc expose svc/inventory
 ```
 
-Now find out the hostname that the inventory service is exposed on:
+Now find out the hostname that the inventory service is exposed on and set it in an environment variable:
 
 ```
-oc get routes/inventory
+$ oc get routes/inventory
+inventory   inventory-myproject.192.168.42.246.nip.io  inventory  http   None
+$ INVENTORY_HOST=inventory-myproject.192.168.42.246.nip.io
 ```
 
 And use that to query the inventory of one of the products that we just checked out from the shopping cart:
 
 ```
-curl http://inventory-myproject.192.168.42.246.nip.io/inventory/456
--2
+curl http://$INVENTORY_HOST/inventory/456
 ```
 
 Since we checked out two of product `456`, and we haven't added anything to its inventory, if the inventory service has successfully consumed the checkout message, we expect the current inventory to be -2.
