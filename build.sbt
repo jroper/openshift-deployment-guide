@@ -34,3 +34,4 @@ Compile / unmanagedSourceDirectories ++= ((Compile / paradox / sourceDirectory).
   ParadoxPlugin.InDirectoryFilter((Compile / paradox / sourceDirectory).value / "includes")
 
 paradoxTheme := Some(builtinParadoxTheme("generic"))
+paradoxNavigationDepth := 3
