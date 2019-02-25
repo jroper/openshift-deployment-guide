@@ -71,7 +71,7 @@ metadata:
   name: strimzi
 spec:
   kafka:
-    replicas: 3
+    replicas: 1
     listeners:
       plain: {}
       tls: {}
