@@ -91,6 +91,7 @@ GRANT CONNECT ON DATABASE $database.user$ TO $database.name$;
 
 \connect $database.name$;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT USAGE ON SCHEMA public TO $database.user$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $database.user$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
