@@ -59,13 +59,15 @@ oc patch deploymentconfig postgresql --patch '{"spec": {"template": {"spec": {"c
 
 To create our database, we'll need to access Postgres. There are two ways to do this, the first is using port forwarding, where you open a port on your local machine, and then use the `psql` client installed on your local machine to connect to it. The second is to shell into the Postgres pod using `oc rsh`, and use the `psql` client installed on the pod to connect to Postgres. The first approach is a little simpler, since the `psql` client on your local machine can access SQL scripts locally on your machine, whereas to run a script when you shell into the pod, you will first need to copy the script there using `oc rsync`.
 
-You will need two terminal windows to use the port forwarding approach. First, start the port forward:
+You will need two terminal windows to use the port forwarding approach. First, start the port forward in your existing window:
 
 ```sh
 oc port-forward svc/postgresql 15432:5432
 ```
 
-Here we're exposing the `postgresql` service port 5432 on our local machine at port 15432. Now, in the other window, first we setup some our Postgres environment variables, note that we've already set the `PGPASSWORD` environment variable:
+Here we're exposing the `postgresql` service port 5432 on our local machine at port 15432.
+
+Now, in the second window, first we setup some our Postgres environment variables:
 
 ```sh
 export PGHOST=localhost
@@ -101,7 +103,7 @@ DDL
 ```
 @@@
 
-Once the schema has been created, you can terminate the port forwarding session in the other window by hitting Ctrl+c. We now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
+Once the schema has been created, you can close the second terminal window, and terminate the port forwarding session in the original window by hitting Ctrl+c. We now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
 
 @@@vars
 ```sh
