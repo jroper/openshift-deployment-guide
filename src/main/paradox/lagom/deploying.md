@@ -36,7 +36,18 @@ $service.name$-756894d68d-d8h5j         0/1       Running   0          9s
 
 Let's take a look at their logs as they go through the cluster bootstrap process. The logs can be very useful for diagnosing cluster startup problems, so understanding what messages will be logged when, and what information they should contain, can greatly help in achieving that.
 
-To view the logs, select one of the pods from the above output (the actual name is random so you'll need to copy from your output, not use the name in this guide), and run:
+To view the logs, run:
+
+@@@vars
+```sh
+oc logs -f deployment/$service.name$
+```
+@@@
+
+
+This shows the logs for the first container in the deployment.
+
+You can also pass the name of a specific pod from the list returned by `oc get pods` to see the logs for that pod (the actual name is random so you'll need to copy from your output, not use the name in this guide):
 
 @@@vars
 ```sh
@@ -93,7 +104,7 @@ Following these messages, you may still some messages warning that messages can'
 
 The logs above show those of a pod that wasn't the pod to start the cluster. As mentioned earlier, the default strategy that Akka Cluster Bootstrap uses when it starts and finds that there is no existing cluster is to get the pod with the lowest IP address to start the cluster. In the example above, that pod has an IP address of `172.17.0.11`, and you can see at 10 that it eventually returns itself as a seed node, which results in this pod joining it.
 
-If you look in the logs of that pod, you'll see a message like this: 
+If you look in the logs of that pod, you'll see a message like this:
 
 ```
 [info] Initiating new cluster, self-joining [akka.tcp://application@172.17.0.11:2552].
