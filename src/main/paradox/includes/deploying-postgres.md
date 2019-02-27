@@ -18,29 +18,22 @@ openssl rand -base64 24
 
 ## Creating a Postgres pod
 
-OpenShift comes with a template for deploying Postgres out of the box, making it very straight forward to run Postgres. Detailed documentation on using it can be found [here](https://docs.openshift.com/container-platform/latest/using_images/db_images/postgresql.html). We'll create a database service called `postgresql`, and pass the `POSTGRESQL_ADMIN_PASSWORD` environment variable, which will cause it to set up an admin user and create no databases by default:
+OpenShift provides images for deploying Postgres out of the box, making it very straight forward to run Postgres. Detailed documentation on using it can be found [here](https://docs.openshift.com/container-platform/latest/using_images/db_images/postgresql.html). We'll create an ephemeral database service called `postgresql`:
 
 ```sh
-export PGPASSWORD=$(openssl rand -base64 24)
-oc new-app postgresql -e POSTGRESQL_ADMIN_PASSWORD=$PGPASSWORD
+oc new-app postgresql
 ```
 
-@@@warning
-This places the PostgreSQL admin password in an environment variable, which is not safe, it is much better to put it in a Kubernetes secret. Unfortunately, the `oc new-app` command [does not allow](https://github.com/openshift/origin/issues/21619) configuring Kubernetes secrets when creating a new app in this way. When going to production, we recommend placing the password in a Kubernetes secret, and then reconfiguring the service after the fact to use the secret rather than placing the password directly in the spec. Reconfiguring is described below.
+@@@note
+The database we've just created is using ephemeral persistence, meaning that if the pod is restarted, all data will be lost. Read [the documentation](https://docs.openshift.com/container-platform/latest/using_images/db_images/postgresql.html) for details on how to deploy persistent databases.
 @@@
 
-Now we can watch the pods to see the `postgresql` pod created:
+The above database will fail to provision, because the Postgres image requires that an environment variable be set for the Postgres admin password. While we could have specified that when we created the app, this would have hard coded it in the spec for the pod, making it readable to anyone that could read pods. Instead, we're going to create a Kubernetes secret containing it, and then we'll update the deployment to use that secret.
+
+First, create the secret with a random password:
 
 ```sh
-oc get pods -w
-```
-
-### Reconfigure secrets
-
-Now we'll add the secret to the Kubernetes secret API, and reconfigure the deployment config to consume it from that, so that the admin password secret doesn't appear in the spec for the service. First, create the secret:
-
-```sh
-oc create secret generic postgresql-admin-password --from-literal=password=$PGPASSWORD
+oc create secret generic postgresql-admin-password --from-literal=password="$(openssl rand -base64 24)"
 ```
 
 Now patch the deployment config just created to use the admin password configured in the service.
@@ -48,45 +41,47 @@ Now patch the deployment config just created to use the admin password configure
 ```sh
 oc patch deploymentconfig postgresql --patch '{"spec": {"template": {"spec": {"containers": [
   {"name": "postgresql", "env": [
-    {"name": "POSTGRESQL_ADMIN_PASSWORD", "value": null, "valueFrom": 
+    {"name": "POSTGRESQL_ADMIN_PASSWORD", "valueFrom": 
       {"secretKeyRef": {"name": "postgresql-admin-password", "key": "password"}}
     }
   ]}
 ]}}}}'
 ```
 
+Now watch the database come up (you may see the old database terminate as the new deployment config is applied):
+
+```sh
+oc get pods -w
+```
+
 ### Creating the Postgres database
+
+We now need to create the database, database user, database user password, and the schema. The first thing we'll do is create the password, again using the secret API:
+
+@@@vars
+```sh
+oc create secret generic $database.secret$ --from-literal=username=$database.user$ --from-literal=password="$(openssl rand -base64 24)"
+```
+@@@
 
 To create our database, we'll need to access Postgres. There are two ways to do this, the first is using port forwarding, where you open a port on your local machine, and then use the `psql` client installed on your local machine to connect to it. The second is to shell into the Postgres pod using `oc rsh`, and use the `psql` client installed on the pod to connect to Postgres. The first approach is a little simpler, since the `psql` client on your local machine can access SQL scripts locally on your machine, whereas to run a script when you shell into the pod, you will first need to copy the script there using `oc rsync`.
 
-You will need two terminal windows to use the port forwarding approach. First, start the port forward:
+First, start the port forward:
 
 ```sh
-oc port-forward svc/postgresql 15432:5432
+oc port-forward svc/postgresql 15432:5432 &
 ```
 
-Here we're exposing the `postgresql` service port 5432 on our local machine at port 15432. Now, in the other window, first we setup some our Postgres environment variables, note that we've already set the `PGPASSWORD` environment variable:
+This has started it in the background, it will output some logs when the tunnel is established, and each time it receives a new connection.
 
-```sh
-export PGHOST=localhost
-export PGPORT=15432
-export PGUSER=postgres
-```
-
-We'll also generate a new password for the user we're about to create for our application to use:
-
-```
-POSTGRES_USER_PASSWORD=$(openssl rand -base64 24)
-```
-
-And now we can just run the `psql` command to connect as the Postgres admin user. We'll directly feed it a script to create a database, a user, and grant that user access to just read/write operations on the database, so they won't be able to execute any DDL statements. Finally, we'll connect to the database and run the database schema script mentioned before:
+Now we can just run the `psql` command to connect as the Postgres admin user. The Postgres image we're using is configured to trust all connections from localhost, and since the port forward command results in connections to it being made on the database as localhost, we can connect as any user without a password. We'll directly feed it a script to create a database, a user, and grant that user access to just read/write operations on the database, so they won't be able to execute any DDL statements. Finally, we'll connect to the database and run the database schema script mentioned before:
 
 @@@vars
 ```sql
-psql <<DDL
+psql -h localhost -p 15432 -U postgres <<DDL
 CREATE DATABASE $database.name$;
 REVOKE CONNECT ON DATABASE $database.name$ FROM PUBLIC;
-CREATE USER $database.user$ WITH PASSWORD '$POSTGRES_USER_PASSWORD';
+CREATE USER $database.user$ WITH PASSWORD '$(oc get secret $database.secret$ -o jsonpath='{.data.password}')';
 GRANT CONNECT ON DATABASE $database.user$ TO $database.name$;
 
 \connect $database.name$;
@@ -101,12 +96,10 @@ DDL
 ```
 @@@
 
-Once the schema has been created, you can terminate the port forwarding session in the other window by hitting Ctrl+c. We now need to also put the user password that we just generated in the Kubernetes secrets API, so that the application can access it without having to have it hard coded in its configuration or deployment spec.
+In the above here document, you can see we've loaded the secret that we just created from the secrets API.
 
-@@@vars
+Once the schema has been created, you can terminate the port forwarding session by killing it:
+
 ```sh
-oc create secret generic $database.secret$ --from-literal=username=$database.user$ --from-literal=password="$POSTGRES_USER_PASSWORD"
+kill %1
 ```
-@@@
-
-When we create the deployment spec for the shopping cart service, we'll reference the above configured secret.
