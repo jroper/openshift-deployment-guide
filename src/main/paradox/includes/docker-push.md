@@ -22,7 +22,7 @@ docker push docker-registry-default.myopenshift.example.com/myproject/$docker.im
 ```
 @@@
 
-When you push a docker image to OpenShifts internal registry, it will automatically create an image stream that the image can be consumed from.
+When you push a docker image to OpenShift's internal registry, it will automatically create an image stream that the image can be consumed from.
 
 Since we're using Kubernetes deployments rather than OpenShift deployment configs, in order to ensure that our deployment can consume this from the internal OpenShift registry with an unqualified tag, we need to allow local lookups on it. This can be enabled by running the following command.
 
