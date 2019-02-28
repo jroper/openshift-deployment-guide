@@ -56,10 +56,10 @@ spec:
     userOperator: {}
 ```
 
-To deploy this, create a file called `kafka.yaml`, and run:
+To deploy this, create a file called `deploy/kafka.yaml`, and run:
 
 ```sh
-oc apply -f kafka.yaml -n myproject
+oc apply -f deploy/kafka.yaml -n myproject
 ```
 
 If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, your machine has no resources left for anything else, such as your application, to use. So instead we'll use a spec that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
@@ -90,10 +90,10 @@ spec:
     userOperator: {}
 ```
 
-Save the above YAML to a file called `kafka.yaml`, and run:
+Save the above YAML to a file called `deploy/kafka-single.yaml`, and run:
 
 ```sh
-oc apply -f kafka.yaml -n myproject
+oc apply -f deploy/kafka-single.yaml -n myproject
 ```
 
 Once you've deployed your Kafka instance, you can watch it come up by running:

@@ -81,11 +81,12 @@ Now we can just run the `psql` command to connect as the Postgres admin user. Th
 psql -h localhost -p 15432 -U postgres <<DDL
 CREATE DATABASE $database.name$;
 REVOKE CONNECT ON DATABASE $database.name$ FROM PUBLIC;
-CREATE USER $database.user$ WITH PASSWORD '$(oc get secret $database.secret$ -o jsonpath='{.data.password}')';
+CREATE USER $database.user$ WITH PASSWORD '$(oc get secret $database.secret$ -o jsonpath='{.data.password}' | base64 --decode)';
 GRANT CONNECT ON DATABASE $database.user$ TO $database.name$;
 
 \connect $database.name$;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT USAGE ON SCHEMA public TO $database.user$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $database.user$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public

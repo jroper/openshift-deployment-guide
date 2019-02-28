@@ -32,13 +32,11 @@ We recommend adding and configuring the Docker plugin in your builds parent POM,
 </plugin>
 ```
 
-There are two things to pay careful attention to here. Firstly, the base image we're using is `adoptopenjdk/openjdk8`. You can use any Docker image that provides a JDK, this is the one we recommend for open source users of OpenShift. You may wish to explicitly select a version, rather than just relying on the latest build, in which case you may change it to:
+There are two things to pay careful attention to here. Firstly, the base image we're using is `adoptopenjdk/openjdk8`. You can use any Docker image that provides a JDK, this is the one we recommend for open source users of OpenShift and is certified by Lightbend for running our products. If you're a RedHat customer, you will likely prefer to use the RedHat certified OpenJDK base images, which use a RedHat certified OpenJDK build on RHEL, which is also certified by Lightbend for running our products:
 
-@@@vars
 ```xml
-<from>adoptopenjdk/openjdk8:$adoptopenjdk.docker.image.version$</from>
+<from>registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift</from>
 ```
-@@@
 
 The second thing to notice is that we've set `skip` to `true`. This means that, by default, for child modules in this build, no Docker image will be built. This is convenient because it means that Maven modules that are just libraries don't have to have any Fabric8 configuration in them, when you do a docker build of your whole project they will just be skipped.
 

@@ -7,6 +7,8 @@ Services that use Akka clustering have a somewhat unique requirement compared to
 4. If a cluster has not yet been formed on any of the pods, a deterministic function is used to decide which pod will initiate the cluster - this function ensures that all pods that are currently going through this process will decide on the same pod.
 5. The pod that is decided to start the cluster forms a cluster with itself.
 6. The remaining pods poll that pod until it reports that it has formed a cluster, they then join it.
+
+For a much more detailed description of this process, see the [Akka Cluster Bootstrap documentation](https://developer.lightbend.com/docs/akka-management/current/bootstrap/details.html).
 <!--- #bootstrap-process --->
 
 <!--- #bootstrap-deps --->

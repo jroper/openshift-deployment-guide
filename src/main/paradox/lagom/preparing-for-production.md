@@ -62,7 +62,6 @@ spec:
               value: "-Xms256m -Xmx256m -Dconfig.resource=prod-application.conf"
           resources:
             limits:
-              cpu: 0.25
               memory: 512Mi
             requests:
               cpu: 0.25
@@ -91,7 +90,7 @@ Here are a few things to note:
 * The image we're using is `shopping-cart-impl:1.0-SNAPSHOT`. This corresponds to the name and version of the service in our build. The use of a snapshot version is useful during development, as it means you don't need to update the version both in the build file and the spec every time you wish to redeploy the application. However, once you go to production, this is strongly discouraged, each new build of the application should have a new, non snapshot version number. A common practice is to use git hashes as version numbers to enforce this.
 * We use the `JAVA_OPTS` environment variable to pass the configuration to tell Lagom to use the `prod-application.conf` configuration file, rather than the default `application.conf`.
 * We've configured a maximum of 256mb of memory for the JVM heap size, while the pod gets 512mb. The reason the pod gets more than the JVM heap size is that the JVM doesn't only consume memory for its heap. The JVM will consume other memory, for class file metadata, thread stacks, compiled code, and JVM specific libraries. To accommodate this we need to give at least an additional 256mb of memory to the pod.
-* We've only allocated very minimal CPU to the pods for this service. This is suitable for a local deployment, but you may wish to increase it if you're deploying to a real deployment.
+* We've only requested very minimal CPU to the pods for this service. This is suitable for a local deployment, but you may wish to increase it if you're deploying to a real deployment. Note that we also haven't set a CPU limit, this is because it's []recommended that JVMs do not set a CPU limit](https://doc.akka.io/docs/akka/2.5/additional/deploy.html#resource-limits).
 * The service exposes HTTP on port 80, and directs it to port 9000 on the pods. Port 9000 is Lagom's default HTTP port.
 
 ## Application secret
@@ -209,13 +208,10 @@ libraryDependencies +=
 
 ### Configuration
 
-Now let's configure Akka discovery to use the asynchronous DNS implementation, by adding the following to `prod-application.conf`:
+Now let's configure Akka discovery to use DNS as the discovery method, by adding the following to `prod-application.conf`:
 
 ```
-akka {
-  discovery.method = akka-dns
-  io.dns.resolver = async-dns
-}
+akka.discovery.method = akka-dns
 ```
 
 ### Binding
