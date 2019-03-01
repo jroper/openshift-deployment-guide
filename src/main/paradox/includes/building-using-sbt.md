@@ -41,6 +41,31 @@ Otherwise, we recommend using the AdoptOpenJDK base image:
 dockerBaseImage := "adoptopenjdk/openjdk8"
 ```
 
+### Git hash based version numbers
+
+This step is optional, but we recommend basing the version number of your application on the current git hash, since this ensures that you will always be able to map whats deployed to production back to the exact version of your application being used.
+
+There are a number of sbt plugins available for generating a version number from a git hash, we're going to use [`sbt-dynver`](https://github.com/dwijnand/sbt-dynver), which incorporates the most recent git tag as the base version number, appends the git hash to that only if there are any changes since that tag, and also includes a datetime stamp if there are local changes in the repository. To add this plugin to your project, add the following to `project/plugins.sbt`:
+
+@@@vars
+```scala
+addSbtPlugin("com.dwijnand" % "sbt-dynver" % "$sbt.dynver.version$")
+```
+@@@
+
+For the plugin to work, you need to ensure that you *don't* specify a `version` in your sbt build, since this will overwrite the version that `sbt-dynver` generates. Additionally, `sbt-dynver` generates versions with a `+` character in them (the `+` is used to indicate how many commits have been added since the last tag, so `1.0+4` indicates this is the 1.0 tag plus 4 commits). To replace this with a `-` character, add the following to `build.sbt`:
+
+```scala
+version in ThisBuild ~= (_.replace('+', '-'))
+dynver in ThisBuild ~= (_.replace('+', '-'))
+```
+
+You may also want to configure the sbt native packager to tag your image as the `latest` image, this will be necessary if you're using the `latest` tag in your deployment spec. To do this, enable `dockerUpdateLatest` in `build.sbt`:
+
+```scala
+dockerUpdateLatest := true
+```
+
 ## Building the docker image
 
 Now that we're setup, we can build our docker image.
@@ -71,5 +96,24 @@ $sbt.prompt$ $sbt.sub.project$/docker:publishLocal
 ```
 @@@
 
-@@include[docker-push.md](docker-push.md)
+## Pushing the docker image
+
+@@include[docker-push.md](docker-push.md) { #intro }
+
+Assuming your docker registry host name is `docker-registry-default.myopenshift.example.com` and your namespace is `myproject`, set the docker registry and username like so:
+
+```scala
+dockerRepository := Some("docker-registry-default.myopenshift.example.com")
+dockerUsername := Some("myproject")
+```
+
+Now you can push your image to the OpenShift registry by running:
+
+@@@vars
+```
+$sbt.prompt$ $sbt.sub.project$/docker:publish
+```
+@@@
+
+@@include[docker-push.md](docker-push.md) { #image-stream }
 <!--- #no-setup --->

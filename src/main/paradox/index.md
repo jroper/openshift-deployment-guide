@@ -31,7 +31,9 @@ In this guide, we will assume that you have created a project called `myproject`
 
 #### Setting up docker
 
-You will need to ensure that you set your environment up to be able to push docker images to your OpenShift installation. This requires exposing your OpenShift installations internal registry to the outside world and then logging in. For more information, see [here](https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#accessing-the-internal-registry) and [here](https://blog.openshift.com/remotely-push-pull-container-images-openshift/).
+You will need to ensure that you set your environment up to be able to push docker images to your OpenShift installation. This requires exposing your OpenShift installations internal registry to the outside world and then logging in. For more information, see [here](https://docs.openshift.com/container-platform/latest/dev_guide/managing_images.html#accessing-the-internal-registry) for how to expose the registry, and [here](https://docs.openshift.com/container-platform/latest/install_config/registry/accessing_registry.html#access-logging-in-to-the-registry) for how to log in once the registry is exposed.
+
+Typically, one this is done, your docker registry will be available at a URL like `docker-registry-default.myopenshift.example.com`.
 
 ### Installing Minishift
 

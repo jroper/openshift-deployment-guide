@@ -10,6 +10,7 @@ paradoxProperties ++= Map(
   "akka.management.version" -> akkaManagementVersion,
   "akka.version" -> "2.5.20",
   "sbt.native.packager.version" -> "1.3.17",
+  "sbt.dynver.version" -> "3.3.0",
   "adoptopenjdk.docker.image.version" -> "jdk8u202-b08",
   "strimzi.version" -> "0.9.0",
   "lagom.akka.discovery.version" -> lagomAkkaDiscoveryVersion,
