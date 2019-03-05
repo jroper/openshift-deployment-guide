@@ -114,7 +114,6 @@ akka.management {
       }
     }
   }
-  http.route-providers += akka.management.HealthCheckRoutes
 }
 ```
 @@@
