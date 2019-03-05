@@ -27,6 +27,8 @@ play {
 
 The first thing this file does is include the main `application.conf` file. Any subsequent configuration will override the configuration from `application.conf`. This pattern allows us to keep our main, non environment specific configuration in `application.conf`, while putting production specific configuration in a separate place.
 
+Setting `play.server.pidfile.path = /dev/null` [disables](https://www.playframework.com/documentation/2.7.x/ProductionConfiguration#Changing-the-path-of-RUNNING_PID) the use of a `pidFile`. A `pidFile` is not necessary for a process running on a container.
+
 Now, let's define an initial, incomplete deployment spec. We'll do this in a file called `deploy/shopping-cart.yaml`:
 
 ```yaml
