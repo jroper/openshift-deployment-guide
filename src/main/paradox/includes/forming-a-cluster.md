@@ -18,6 +18,7 @@ To use Akka cluster bootstrap, you'll need to add the following dependencies to 
 
 sbt
 :    @@@vars
+
 ```scala
 libraryDependencies ++= Seq(
   "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % "$akka.management.version$",
@@ -29,6 +30,7 @@ libraryDependencies ++= Seq(
 
 Maven
 :    @@@vars
+
 ```xml
 <dependency>
   <groupId>com.lightbend.akka.management</groupId>
@@ -82,7 +84,9 @@ It will also expose liveness and readiness health checks on `/alive` and `/ready
 
 To configure cluster bootstrap, we need to tell it which discovery method will be used to discover the other nodes in the cluster. This uses Akka discovery to find nodes, however, the discovery method and configuration used in cluster bootstrap will often be different to the method used for looking up other services. The reason for this is that during cluster bootstrap, we are interested in discovering nodes even when they aren't ready to handle requests yet, for example, because they too are trying to form a cluster. If we were to use a method such as DNS to lookup other services, the Kubernetes DNS server, by default, will only return services that are ready to serve requests, indicated by their readiness check passing. Hence, when forming a new cluster, there is a chicken or egg problem, Kubernetes won't tell us which nodes are running that we can form a cluster with until those nodes are ready, and those nodes won't pass their readiness check until they've formed a cluster.
 
-Hence, we need to use a different discovery method for cluster bootstrap, and for Kubernetes, the simplest method is to use the Kubernetes API, which will return all nodes regardless of their readiness state. This can be configured like so:
+Hence, we need to use a different discovery method for cluster bootstrap, and for Kubernetes, the simplest method is to use the Kubernetes API, which will return all nodes regardless of their readiness state. 
+
+First, you need to depend on `akka-discovery-kubernetes-api`  (see thhe list of dependencies listed at the beginning of this page for the exact syntax) and then you must configure that discovery mechanism like so:
 
 @@@vars
 ```
