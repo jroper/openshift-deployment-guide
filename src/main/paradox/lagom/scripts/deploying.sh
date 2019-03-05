@@ -22,7 +22,7 @@ then
         #sbt-publish-inventory
     else
         #maven-publish-inventory
-        mvn -Ddocker.username=$NAMESPACE -Ddocker.registry=$DOCKER_REPO_URL -am -pl inventory package docker:push
+        mvn -Ddocker.useOpenShiftAuth -Ddocker.registry=$DOCKER_REPO_URL/$NAMESPACE -am -pl inventory package docker:push
         #maven-publish-inventory
     fi
 

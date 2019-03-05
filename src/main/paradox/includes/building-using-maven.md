@@ -15,7 +15,7 @@ We recommend adding and configuring the Docker plugin in your builds parent POM,
         <skip>true</skip>
         <images>
             <image>
-                <name>${docker.username}/%a:%l</name>
+                <name>%a:%l</name>
                 <build>
                     <from>adoptopenjdk/openjdk8</from>
                     <tags>
@@ -31,15 +31,13 @@ We recommend adding and configuring the Docker plugin in your builds parent POM,
 </plugin>
 ```
 
-There are three things to pay careful attention to here. Firstly, the base image we're using is `adoptopenjdk/openjdk8`. You can use any Docker image that provides a JDK, this is the one we recommend for open source users of OpenShift and is certified by Lightbend for running our products. If you're a RedHat customer, you will likely prefer to use the RedHat certified OpenJDK base images, which use a RedHat certified OpenJDK build on RHEL, which is also certified by Lightbend for running our products:
+There are two things to pay careful attention to here. Firstly, the base image we're using is `adoptopenjdk/openjdk8`. You can use any Docker image that provides a JDK, this is the one we recommend for open source users of OpenShift and is certified by Lightbend for running our products. If you're a RedHat customer, you will likely prefer to use the RedHat certified OpenJDK base images, which use a RedHat certified OpenJDK build on RHEL, which is also certified by Lightbend for running our products:
 
 ```xml
 <from>registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift</from>
 ```
 
 The second thing to notice is that we've set `skip` to `true`. This means that, by default, for child modules in this build, no Docker image will be built. This is convenient because it means that Maven modules that are just libraries don't have to have any Fabric8 configuration in them, when you do a docker build of your whole project they will just be skipped.
-
-Finally, we're reading the docker username from a system property. This ensures that our build is not tied to any particular OpenShift environment or namespace. We'll need to be careful to ensure we set this system property when invoking Maven. In addition to this system property being externalised, Fabric8 also automatically reads a system property called `docker.registry` to know which docker registry to deploy to, which we will also set when we invoke Maven.
 
 ### Git hash based version numbers
     
@@ -129,7 +127,7 @@ As you can see, now we're overriding the `skip` configuration from the parent PO
 
 ## Building the docker image
 
-Now that we're setup, we can build our docker image. Let's build and deploy the image for the `shopping-cart` project:
+Now that we're setup, we can build our docker image. To do so, we need to tell the Fabric8 plugin which docker registry to use. This can be done using the `docker.registry` system property - this should include the namespace. Fabric8 also has built in support for authenticating with OpenShift, which can be enabled using the `docker.useOpenShiftAuth` system property. Let's build and deploy the image for the `shopping-cart` project:
 
 @@snip[building.sh](scripts/building.sh) { #maven }
 

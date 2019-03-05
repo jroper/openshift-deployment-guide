@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 runTest() {
@@ -18,5 +20,5 @@ runTest() {
 
 # Minishift
 runTest shopping-cart-scala https://github.com/lagom/shopping-cart-scala.git
-#runTest shopping-cart-java-sbt https://github.com/lagom/shopping-cart-java.git -skip-strimzi
-#runTest shopping-cart-java-maven https://github.com/lagom/shopping-cart-java.git -maven -skip-strimzi
+runTest shopping-cart-java-sbt https://github.com/lagom/shopping-cart-java.git -skip-strimzi
+runTest shopping-cart-java-maven https://github.com/lagom/shopping-cart-java.git -maven -skip-strimzi

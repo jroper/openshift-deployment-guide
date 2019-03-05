@@ -64,7 +64,7 @@ do
         "-centralpark")
             INSTALL_STRIMZI=0
             INSTALL_KAFKA_REQUIRES_ADMIN=0
-            DOCKER=docker-registry-default.centralpark.lightbend.com
+            DOCKER_REPO_URL=docker-registry-default.centralpark.lightbend.com
             ;;
         "-kafka-nodes")
             shift

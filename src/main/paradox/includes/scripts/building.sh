@@ -20,7 +20,7 @@ then
         #sbt
     else
         #maven
-        mvn -Ddocker.username=$NAMESPACE -Ddocker.registry=$DOCKER_REPO_URL -am -pl shopping-cart package docker:push
+        mvn -Ddocker.useOpenShiftAuth -Ddocker.registry=$DOCKER_REPO_URL/$NAMESPACE -am -pl shopping-cart package docker:push
         #maven
     fi
 
