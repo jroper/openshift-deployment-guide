@@ -27,7 +27,13 @@ If you wish to install a full OpenShift cluster from scratch, you can follow one
 * [OKD](https://docs.okd.io/latest/getting_started/administrators.html) - These are instructions for installing OKD, the open source distribution of OpenShift.
 * [OpenShift Container Platform](https://docs.openshift.com/container-platform/latest/getting_started/install_openshift.html) - These are instructions for installing OpenShift Container Platform, RedHats commercially supported OpenShift distribution. It requires a RedHat license to run it.
 
-In this guide, we will assume that you have created a project called `myproject`, and will use this as the default namespace that all applications get deployed to. You can either create this project yourself, or use a different project, but be careful to ensure that all commands and configuration files that reference `myproject` are updated to use the project you create.
+In this guide, we will assume that you have created a project called `myproject`, and will use this as the default namespace that all applications get deployed to. For convenience, all the commands we use that need the namespace will use a variable called `NAMESPACE`, so if you set this in your shell, like so:
+
+```sh
+NAMESPACE=myproject
+```
+
+Then you'll just be able to copy and paste all the commands. That said, there are some configuration files that will have `myproject` hard coded and may need to be updated, so if you're not using the `myproject` project, you'll need to update these.
 
 #### Setting up docker
 
@@ -59,14 +65,14 @@ Now you can start Minishift:
 minishift start
 ```
 
-Once Minishift is started, you need to ensure that the `oc` binary is on your path, and that your environment is configured to be able to push to Minishifts internal docker registry. To do this, run:
+Once Minishift is started, you need to ensure that the `oc` binary is on your path, and that your environment is configured to use the Minishift VMS docker host. To do this, run:
 
 ```
 eval $(minishift oc-env)
 eval $(minishift docker-env)
 ```
 
-The first command modifies your `PATH` to ensure the `oc` binary is on it, the second sets some `DOCKER_*` environment variables to tell Docker which host to use and how to authenticate with it when building images. Since these commands just modify environment varibales in your current shell session, they will need to be rerun every time you open a new terminal window, or any time you delete and then restart your Minishift instance.
+The first command modifies your `PATH` to ensure the `oc` binary is on it, the second sets some `DOCKER_*` environment variables to tell Docker which host to use and how to authenticate with it when building images. Since these commands just modify environment variables in your current shell session, they will need to be rerun every time you open a new terminal window, or any time you delete and then restart your Minishift instance.
 
 ## Guides
 

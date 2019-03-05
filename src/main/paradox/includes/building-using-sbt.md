@@ -66,54 +66,24 @@ You may also want to configure the sbt native packager to tag your image as the 
 dockerUpdateLatest := true
 ```
 
-## Building the docker image
+### Configuring deployment
 
-Now that we're setup, we can build our docker image.
-
-@@@ note { title=Remember }
-If you are using Minishift, ensure you have setup your docker environment as described in @ref:[Installing Minishift](../index.md#installing-minishiftshift). This means running:
-
-```
-eval $(minishift docker-env)
-```
-@@@
- 
-Start `sbt`, and then in the sbt shell, run:
-
-@@@vars
-```
-$sbt.prompt$ docker:publishLocal
-```
-@@@
-
-This will publish all projects for which you have sbt native packager enabled to your docker repository. The first time you run this it may take some time as it downloads the docker base image layers to your repository, but subsequent runs will be fast.
-
-If you have multiple projects, then you may wish to deploy just one of those projects, this can be done like so:
-
-@@@vars
-```
-$sbt.prompt$ $sbt.sub.project$/docker:publishLocal
-```
-@@@
-
-## Pushing the docker image
-
-@@include[docker-push.md](docker-push.md) { #intro }
-
-Assuming your docker registry host name is `docker-registry-default.myopenshift.example.com` and your namespace is `myproject`, set the docker registry and username like so:
+After building the docker image, we will need to deploy it to the built in OpenShift docker registry. To do that, we need to configure both the docker username, which should equal the OpenShift project/namespace, as well as the registry. This can be done by configuring the `dockerUsername` and `dockerRepository` settings:
 
 ```scala
-dockerRepository := Some("docker-registry-default.myopenshift.example.com")
-dockerUsername := Some("myproject")
+dockerUsername := sys.props.get("docker.username")
+dockerRepository := sys.props.get("docker.registry")
 ```
 
-Now you can push your image to the OpenShift registry by running:
+In this case, we're reading both variables from system properties, which ensures that the build is not tied to any particular OpenShift installation. We'll supply these system properties when we invoke sbt.
 
-@@@vars
-```
-$sbt.prompt$ $sbt.sub.project$/docker:publish
-```
-@@@
+## Building the docker image
 
-@@include[docker-push.md](docker-push.md) { #image-stream }
+Now that we're setup, we can build our docker image. Run the following:
+
+@@snip[building.sh](scripts/building.sh) { #sbt }
+
+This will build the project that you wish to build, tag it, and then push it to the configured OpenShift registry.
+
+@@include[building.md](building.md) { #image-stream }
 <!--- #no-setup --->

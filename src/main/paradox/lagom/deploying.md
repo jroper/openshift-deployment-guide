@@ -1,7 +1,5 @@
 ---
-service.name = shopping-cart
 actor.system.name = application
-spec.path = deploy/shopping-cart.yaml
 ---
 # Deploying
 
@@ -9,11 +7,7 @@ With the docker image built and pushed to the OpenShift registry, we can now dep
 
 Run the following command:
 
-@@@vars
-```sh
-oc apply -f $spec.path$
-```
-@@@
+@@snip[deploying.sh](scripts/deploying.sh) { #apply-shopping-cart }
 
 @@@note
 If you haven't been creating the files as you go for the guide, but rather are relying on the existing files distributed with the sample app, make sure you have performed the following easy to miss steps:
@@ -26,9 +20,9 @@ Immediately after running this, you should see the three shopping cart pods when
 
 @@@vars
 ```
-$service.name$-756894d68d-9sltd         0/1       Running   0          9s
-$service.name$-756894d68d-bccdv         0/1       Running   0          9s
-$service.name$-756894d68d-d8h5j         0/1       Running   0          9s
+shopping-cart-756894d68d-9sltd         0/1       Running   0          9s
+shopping-cart-756894d68d-bccdv         0/1       Running   0          9s
+shopping-cart-756894d68d-d8h5j         0/1       Running   0          9s
 ```
 @@@
 
@@ -40,7 +34,7 @@ To view the logs, run:
 
 @@@vars
 ```sh
-oc logs -f deployment/$service.name$
+oc logs -f deployment/shopping-cart
 ```
 @@@
 
@@ -51,7 +45,7 @@ You can also pass the name of a specific pod from the list returned by `oc get p
 
 @@@vars
 ```sh
-oc log -f pods/$service.name$-756894d68d-9sltd
+oc log -f pods/shopping-cart-756894d68d-9sltd
 ```
 @@@
 
@@ -64,9 +58,9 @@ By default, the logging in the application during startup is reasonably noisy. Y
    [info] Bootstrap using `akka.discovery` method: kubernetes-api
 2  [info] Binding Akka Management (HTTP) endpoint to: 172.17.0.12:8558
    [info] Using self contact point address: http://172.17.0.12:8558
-3  [info] Looking up [Lookup($service.name$,Some(management),Some(tcp))]
-4  [info] Querying for pods with label selector: [app=$service.name$]. Namespace: [myproject]. Port: [management]
-5  [info] Located service members based on: [Lookup($service.name$,Some(management),Some(tcp))]:
+3  [info] Looking up [Lookup(shopping-cart,Some(management),Some(tcp))]
+4  [info] Querying for pods with label selector: [app=shopping-cart]. Namespace: [myproject]. Port: [management]
+5  [info] Located service members based on: [Lookup(shopping-cart,Some(management),Some(tcp))]:
      [ResolvedTarget(172-17-0-12.myproject.pod.cluster.local,Some(8558),Some(/172.17.0.12)),
       ResolvedTarget(172-17-0-11.myproject.pod.cluster.local,Some(8558),Some(/172.17.0.11)),
       ResolvedTarget(172-17-0-13.myproject.pod.cluster.local,Some(8558),Some(/172.17.0.13))]
@@ -127,25 +121,21 @@ Once the service is running, and a cluster has formed, the state should change t
 
 @@@vars
 ```
-$service.name$-756894d68d-9sltd         1/1       Running   0          9s
-$service.name$-756894d68d-bccdv         1/1       Running   0          9s
-$service.name$-756894d68d-d8h5j         1/1       Running   0          9s
+shopping-cart-756894d68d-9sltd         1/1       Running   0          9s
+shopping-cart-756894d68d-bccdv         1/1       Running   0          9s
+shopping-cart-756894d68d-d8h5j         1/1       Running   0          9s
 ```
 @@@
 
 Now you can interact with the service. First we need to expose it to the outside world. We can do this using the `oc expose` command.
 
-@@@vars
-```
-oc expose svc/$service.name$
-```
-@@@
+@@snip[deploying.sh](scripts/deploying.sh) { #expose-shopping-cart }
 
 You can then see the hostname to access it by getting the routes:
 
 @@@vars
 ```
-$ oc get routes/$service.name$
+$ oc get routes/shopping-cart
 ```
 @@@
 
@@ -153,26 +143,20 @@ You should see something like this:
 
 @@@vars
 ```
-$service.name$   $service.name$-myproject.192.168.42.246.nip.io  $service.name$  http   None
+shopping-cart   shopping-cart-myproject.192.168.42.246.nip.io  shopping-cart  http   None
 ```
 @@@
 
-If you're using Minishift, your hostname will contain a domain name like `192.168.42.246.nip.io`, but not exactly the same as the Minishift IP address is selected at random on startup. Otherwise, it will be the domain name that your OpenShift cluster is running on. You can use the above hostname to connect to the service, let's try that:
+If you're using Minishift, your hostname will contain a domain name like `192.168.42.246.nip.io`, but not exactly the same as the Minishift IP address is selected at random on startup. Otherwise, it will be the domain name that your OpenShift cluster is running on. For convenient, let's put the hostname in an environment variable, this will allow you to copy/paste the following commands:
 
-@@@vars
+@@snip[deploying.sh](scripts/deploying.sh) { #shopping-cart-host }
+
+Now let's try a simple GET request on the shopping cart service:
+
 ```
-$ curl http://$service.name$-myproject.192.168.42.246.nip.io/shoppingcart/123
+curl http://$SHOPPING_CART_HOST/shoppingcart/123
 {"id":"123","items":[],"checkedOut":false}
 ```
-@@@
-
-For convenience, let's place the hostname in an environment variable, which will then allow the remainder of the curl commands to be copied and pasted into your terminal as is.
-
-@@@vars
-```
-$ SHOPPING_CART_HOST=$service.name$-myproject.192.168.42.246.nip.io
-```
-@@@
 
 Now let's try adding some items to the shopping cart:
 
@@ -187,38 +171,24 @@ curl http://$SHOPPING_CART_HOST/shoppingcart/123
 Finally, let's checkout the shopping cart
 
 ```
-$ curl http://$SHOPPING_CART_HOST/shoppingcart/123/checkout -X POST
+curl http://$SHOPPING_CART_HOST/shoppingcart/123/checkout -X POST
 ```
 
 At this point, the shopping cart service should publish a message to Kafka. Let's deploy the inventory service to consume that message. We won't go into the details of how to configure it and its deployment descriptor since it's just a subset of what's needed for the shopping cart service - it doesn't need to form a cluster, it doesn't have a database, it just has a single node and needs to connect to Kafka. First, if you haven't already, build and push the inventory service to the docker registry:
 
 sbt
-:    ```
-sbt inventory-impl/docker:publishLocal
-```
+:    @@snip[deploying.sh](scripts/deploying.sh) { #sbt-publish-inventory }
 
 Maven
-:    ```
-mvn package docker:build
-```
+:    @@snip[deploying.sh](scripts/deploying.sh) { #maven-publish-inventory }
 
-If you're not using Minishift, you'll now need to push the docker image as described for @ref[sbt](building-using-sbt.md#pushing-the-docker-image) and @ref[Maven](building-using-maven.md#pushing-the-docker-image).
+Now, we can configure the image lookup, create the application secret, apply the deployment spec, and expose the service:
 
-Now, we can create the application secret, apply the deployment spec, and expose the service:
-
-```
-oc create secret generic inventory-application-secret --from-literal=secret="$(openssl rand -base64 48)"
-oc apply -f deploy/inventory.yaml
-oc expose svc/inventory
-```
+@@snip[deploying.sh](scripts/deploying.sh) { #inventory-deploy }
 
 Now find out the hostname that the inventory service is exposed on and set it in an environment variable:
 
-```
-$ oc get routes/inventory
-inventory   inventory-myproject.192.168.42.246.nip.io  inventory  http   None
-$ INVENTORY_HOST=inventory-myproject.192.168.42.246.nip.io
-```
+@snip[deploying.sh](scripts/deploying.sh) { #inventory-host }
 
 And use that to query the inventory of one of the products that we just checked out from the shopping cart:
 

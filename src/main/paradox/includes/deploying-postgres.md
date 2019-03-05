@@ -20,9 +20,7 @@ openssl rand -base64 24
 
 OpenShift provides images for deploying Postgres out of the box, making it very straight forward to run Postgres. Detailed documentation on using it can be found [here](https://docs.openshift.com/container-platform/latest/using_images/db_images/postgresql.html). We'll create an ephemeral database service called `postgresql`:
 
-```sh
-oc new-app postgresql
-```
+@@snip[postgresql.sh](scripts/postgresql.sh) { #new-app }
 
 @@@note
 The database we've just created is using ephemeral persistence, meaning that if the pod is restarted, all data will be lost. Read [the documentation](https://docs.openshift.com/container-platform/latest/using_images/db_images/postgresql.html) for details on how to deploy persistent databases.
@@ -32,21 +30,11 @@ The above database will fail to provision, because the Postgres image requires t
 
 First, create the secret with a random password:
 
-```sh
-oc create secret generic postgresql-admin-password --from-literal=password="$(openssl rand -base64 24)"
-```
+@@snip[postgresql.sh](scripts/postgresql.sh) { #create-admin-password }
 
 Now patch the deployment config just created to use the admin password configured in the service.
 
-```sh
-oc patch deploymentconfig postgresql --patch '{"spec": {"template": {"spec": {"containers": [
-  {"name": "postgresql", "env": [
-    {"name": "POSTGRESQL_ADMIN_PASSWORD", "valueFrom": 
-      {"secretKeyRef": {"name": "postgresql-admin-password", "key": "password"}}
-    }
-  ]}
-]}}}}'
-```
+@@snip[postgresql.sh](scripts/postgresql.sh) { #patch }
 
 Now watch the database come up (you may see the old database terminate as the new deployment config is applied):
 
@@ -58,44 +46,19 @@ oc get pods -w
 
 We now need to create the database, database user, database user password, and the schema. The first thing we'll do is create the password, again using the secret API:
 
-@@@vars
-```sh
-oc create secret generic $database.secret$ --from-literal=username=$database.user$ --from-literal=password="$(openssl rand -base64 24)"
-```
-@@@
+@@snip[postgresql.sh](scripts/postgresql.sh) { #create-user-password }
 
 To create our database, we'll need to access Postgres. There are two ways to do this, the first is using port forwarding, where you open a port on your local machine, and then use the `psql` client installed on your local machine to connect to it. The second is to shell into the Postgres pod using `oc rsh`, and use the `psql` client installed on the pod to connect to Postgres. The first approach is a little simpler, since the `psql` client on your local machine can access SQL scripts locally on your machine, whereas to run a script when you shell into the pod, you will first need to copy the script there using `oc rsync`.
 
 First, start the port forward:
 
-```sh
-oc port-forward svc/postgresql 15432:5432 &
-```
+@@snip[postgresql.sh](scripts/postgresql.sh) { #port-forward }
 
 This has started it in the background, it will output some logs when the tunnel is established, and each time it receives a new connection.
 
 Now we can just run the `psql` command to connect as the Postgres admin user. The Postgres image we're using is configured to trust all connections from localhost, and since the port forward command results in connections to it being made on the database as localhost, we can connect as any user without a password. We'll directly feed it a script to create a database, a user, and grant that user access to just read/write operations on the database, so they won't be able to execute any DDL statements. Finally, we'll connect to the database and run the database schema script mentioned before:
 
-@@@vars
-```sql
-psql -h localhost -p 15432 -U postgres <<DDL
-CREATE DATABASE $database.name$;
-REVOKE CONNECT ON DATABASE $database.name$ FROM PUBLIC;
-CREATE USER $database.user$ WITH PASSWORD '$(oc get secret $database.secret$ -o jsonpath='{.data.password}' | base64 --decode)';
-GRANT CONNECT ON DATABASE $database.user$ TO $database.name$;
-
-\connect $database.name$;
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-GRANT USAGE ON SCHEMA public TO $database.user$;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $database.user$;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, USAGE ON SEQUENCES TO $database.user$;
-  
-\include $database.script$;
-DDL
-```
-@@@
+@@snip[postgresql.sh](scripts/postgresql.sh) { #create-ddl }
 
 In the above here document, you can see we've loaded the secret that we just created from the secrets API.
 

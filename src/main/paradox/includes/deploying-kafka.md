@@ -8,17 +8,11 @@ Fortunately, Kubernetes provides a mechanism for capturing the operational conce
 
 To install the Strimzi cluster operator, you need to be logged in as a cluster administrator. If using Minishift, you can log in using the following command:
 
-```sh
-oc login -u system:admin
-```
+@@snip[kafka.sh](scripts/kafka.sh) { #login-sysadmin }
 
 Now you can install Strimzi using the following command:
 
-@@@vars
-```sh
-oc apply -f https://github.com/strimzi/strimzi-kafka-operator/releases/download/$strimzi.version$/strimzi-cluster-operator-$strimzi.version$.yaml -n myproject
-```
-@@@
+@@snip[kafka.sh](scripts/kafka.sh) { #install-strimzi }
 
 @@@note
 Be careful to ensure that the `myproject` project matches the OpenShift project you are using.
@@ -58,9 +52,7 @@ spec:
 
 To deploy this, create a file called `deploy/kafka.yaml`, and run:
 
-```sh
-oc apply -f deploy/kafka.yaml -n myproject
-```
+@@snip[kafka.sh](scripts/kafka.sh) { #install-kafka-multi }
 
 If you're deploying to Minishift however, then you'll likely find that by the time all the ZooKeeper and Kafka instances are deployed, along with all the auxiliary services deployed by the operator, your machine has no resources left for anything else, such as your application, to use. So instead we'll use a spec that only deploys one Kafka replica and one ZooKeeper replica. In addition, we'll need to change the replication factors to one, since with only one replica, we can't replicate more than once.
 
@@ -92,9 +84,7 @@ spec:
 
 Save the above YAML to a file called `deploy/kafka-single.yaml`, and run:
 
-```sh
-oc apply -f deploy/kafka-single.yaml -n myproject
-```
+@@snip[kafka.sh](scripts/kafka.sh) { #install-kafka-single }
 
 Once you've deployed your Kafka instance, you can watch it come up by running:
 
@@ -132,6 +122,4 @@ As you can see, there is a service called `strimzi-kafka-brokers`, this is the s
 
 Once Kafka is deployed and running, you no longer need to be logged in as an administrator, so log back in as your old user. If using Minishift, that means logging in as the developer user:
 
-```sh
-oc login -u developer
-```
+@@snip[kafka.sh](scripts/kafka.sh) { #login-developer }

@@ -90,7 +90,7 @@ akka.management {
   cluster.bootstrap {
     contact-point-discovery {
       discovery-method = kubernetes-api
-      service-name = "$service.name$"
+      service-name = "shopping-cart"
       required-contact-point-nr = ${REQUIRED_CONTACT_POINT_NR}
       kubernetes-api {
         pod-port-name = management
@@ -177,9 +177,9 @@ In the deployment spec, set the replicas to 3:
 apiVersion: "apps/v1beta2"
 kind: Deployment
 metadata:
-  name: $service.name$
+  name: shopping-cart
   labels:
-    app: $service.name$
+    app: shopping-cart
 spec:
   replicas: 3
 ```

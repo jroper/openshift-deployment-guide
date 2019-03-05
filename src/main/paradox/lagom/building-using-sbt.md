@@ -1,8 +1,5 @@
 ---
 sbt.prompt: [shopping-cart] $
-sbt.sub.project: shopping-cart-impl
-docker.image: shopping-cart-impl
-docker.image.tag: shopping-cart-impl:1.0-SNAPSHOT
 ---
 # Building using sbt
 

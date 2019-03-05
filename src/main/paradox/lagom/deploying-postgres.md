@@ -1,8 +1,5 @@
 ---
-database.name=shopping_cart
-database.user=shopping_cart
 database.script=schemas/shopping-cart.sql
-database.secret=postgres-shopping-cart
 ---
 # Deploying Postgres
 
