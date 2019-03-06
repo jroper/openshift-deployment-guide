@@ -58,7 +58,7 @@ There are three components that need to be configured for cluster bootstrap to w
 
 The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout.
 
-```
+```HOCON
 akka {
     actor {
         provider = cluster
@@ -76,7 +76,23 @@ Akka management HTTP provides an HTTP API for querying the status of the Akka cl
 
 The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address.
 
-It will also expose liveness and readiness health checks on `/alive` and `/ready` respectively, and included in the readiness check will be a check to ensure that a cluster has been formed. In Kubernetes, if an application is live, it means its running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or in our case, it may not have formed a cluster yet. By separating liveness and readiness, Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
+### Health Checks
+
+Once Akka management HTTP is included on your process it is possible to deploy [health check routes](https://developer.lightbend.com/docs/akka-management/current/healthchecks.html) (the routes are part of Akka management HTTP but not enabled by default). To enable the health check routes add the following on `prod-application.conf`:
+
+```
+akka {
+    management {
+        http.route-providers += akka.management.HealthCheckRoutes
+    }
+}
+```
+
+This will expose liveness and readiness health checks on `/alive` and `/ready` respectively. 
+
+In Kubernetes, if an application is live, it means its running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or in our case, it may not have formed a cluster yet. By separating liveness and readiness, Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
+
+These routes expose information which is the result of multiple internal checks. For example, by depending on `akka-management-cluster-http` (see above) the health checks will take cluster membership status into consideration and will be a check to ensure that a cluster has been formed.
 
 ### Cluster bootstrap
 
@@ -98,7 +114,6 @@ akka.management {
       }
     }
   }
-  http.route-providers += akka.management.HealthCheckRoutes
 }
 ```
 @@@
