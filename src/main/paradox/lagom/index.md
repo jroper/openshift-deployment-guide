@@ -15,10 +15,11 @@ Before you proceed, it is strongly recommended that you clone the repository, re
 
 @@@ index
 
-* [Deploying Postgres](deploying-postgres.md)
-* [Deploying Kafka](deploying-kafka.md)
+* [Prerequisites](prerequisites.md)
 * [Preparing for production](preparing-for-production.md)
 * [Building the application](building.md)
 * [Deploying the application](deploying.md)
+* [Appendix A - Deploying Postgres](deploying-postgres.md)
+* [Appendix B - Deploying Kafka](deploying-kafka.md)
 
 @@@
