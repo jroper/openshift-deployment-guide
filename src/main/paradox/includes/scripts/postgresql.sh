@@ -25,8 +25,6 @@ waitForApp app=postgresql 1
 oc port-forward svc/postgresql 15432:5432 &
 #port-forward
 
-trap 'kill $(jobs -p)' EXIT
-
 echo Sleeping for 5 seconds while port forward is established...
 sleep 5
 
@@ -52,3 +50,5 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 \include schemas/shopping-cart.sql;
 DDL
 #create-ddl
+
+kill %1
