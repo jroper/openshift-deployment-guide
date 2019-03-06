@@ -23,7 +23,7 @@ We will not actually document installing OpenShift or Minishift in this guide, s
 ### Installing a full cluster
 
 If you wish to install a full OpenShift cluster from scratch, you can follow one of the following:
- 
+
 * [OKD](https://docs.okd.io/latest/getting_started/administrators.html) - These are instructions for installing OKD, the open source distribution of OpenShift.
 * [OpenShift Container Platform](https://docs.openshift.com/container-platform/latest/getting_started/install_openshift.html) - These are instructions for installing OpenShift Container Platform, RedHats commercially supported OpenShift distribution. It requires a RedHat license to run it.
 
@@ -39,7 +39,7 @@ Then you'll just be able to copy and paste all the commands. That said, there ar
 
 You will need to ensure that you set your environment up to be able to push docker images to your OpenShift installation. This requires exposing your OpenShift installations internal registry to the outside world and then logging in. For more information, see [here](https://docs.openshift.com/container-platform/latest/dev_guide/managing_images.html#accessing-the-internal-registry) for how to expose the registry, and [here](https://docs.openshift.com/container-platform/latest/install_config/registry/accessing_registry.html#access-logging-in-to-the-registry) for how to log in once the registry is exposed.
 
-Typically, one this is done, your docker registry will be available at a URL like `docker-registry-default.myopenshift.example.com`.
+Typically, once this is done, your docker registry will be available at a URL like `docker-registry-default.myopenshift.example.com`.
 
 ### Installing Minishift
 
