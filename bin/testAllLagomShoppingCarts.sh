@@ -12,7 +12,7 @@ runTest() {
     mkdir $NAME
     git clone $REPO $NAME
     cd $NAME
-    sed -i "s/myproject/foo/" deploy/shopping-cart.yaml
+    sed -i "s/myproject/$NAME/" deploy/shopping-cart.yaml
     oc new-project $NAME
     $THIS_SCRIPT_DIR/testLagomShoppingCart.sh -namespace $NAME $@
     oc delete project $NAME
@@ -20,5 +20,5 @@ runTest() {
 
 # Minishift
 runTest shopping-cart-scala https://github.com/lagom/shopping-cart-scala.git
-runTest shopping-cart-java-sbt https://github.com/lagom/shopping-cart-java.git -skip-strimzi
-runTest shopping-cart-java-maven https://github.com/lagom/shopping-cart-java.git -maven -skip-strimzi
+runTest shopping-cart-java-sbt https://github.com/lagom/shopping-cart-java.git
+runTest shopping-cart-java-maven https://github.com/lagom/shopping-cart-java.git -maven

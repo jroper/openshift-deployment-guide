@@ -11,7 +11,8 @@ then
     echo Installing Strimzi...
 
     #install-strimzi
-    oc apply -f https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.9.0/strimzi-cluster-operator-0.9.0.yaml -n $NAMESPACE
+    curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.9.0/strimzi-cluster-operator-0.9.0.yaml | \
+      sed "s/myproject/$NAMESPACE/" | oc apply -f - -n $NAMESPACE
     #install-strimzi
 fi
 

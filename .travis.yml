@@ -1,13 +1,38 @@
-sudo: false
+sudo: required
 dist: xenial
-language: scala
 jdk: openjdk8
-script: sbt paradox
+language: scala
+
+branches:
+  only:
+  - master
+
+jobs:
+  include:
+    - stage: Tests
+      name: "sbt tests"
+      script: sbt paradox compile
+    - name: "Minishift"
+      env: CPLATFORM=minishift
+      before_script:
+      ## FIXME Workaround for https://github.com/kubernetes/kubernetes/issues/61058
+      ### And https://github.com/LiliC/travis-minikube/blob/e0f26f7b388057f51a0e2558afd5f990e07b6c49/.travis.yml#L11
+      - sudo mount --make-rshared /
+
+      - bash -x ci/prepare-host $CPLATFORM
+      - bash -x ci/prepare-host virtctl
+      - bash -x ci/start-cluster $CPLATFORM $CVER
+      - oc login -u developer
+      script: bin/testAllLagomShoppingCarts.sh
 
 cache:
   directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt
+  - $HOME/.m2
+  - cache
+  - "~/.minishift/cache"
+  - "~/.minikube/cache"
 
 before_cache:
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -delete
