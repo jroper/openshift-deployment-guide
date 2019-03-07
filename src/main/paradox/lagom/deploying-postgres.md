@@ -1,9 +1,9 @@
 ---
 database.script=schemas/shopping-cart.sql
 ---
-# Deploying Postgres
+# Appendix A - Deploying Postgres
 
-The Lagom shopping cart sample app uses Postgres as its database. Lets deploy and configure that first.
+The Lagom shopping cart sample app uses Postgres as its database.
 
 ## Database schema
 

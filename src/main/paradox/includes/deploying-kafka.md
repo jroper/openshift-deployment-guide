@@ -2,7 +2,7 @@ Kafka is relatively difficult to install. You need to install ZooKeeper, which K
 
 Fortunately, Kubernetes provides a mechanism for capturing the operational concerns of difficult deployments like this, using a feature called operators. An operator is able to encode how to provision and configure deployments, providing high level features to scale them up and down, allowing backups, and so on, allowing you as the end user to deploy the components the operator manages with minimal effort. [Strimzi](https://strimzi.io/) is an open source project that provides an operator for Kafka.
 
-[Lightbend](https://www.lightbend.com) provides a [commercially supported](https://www.lightbend.com/lightbend-platform) Strimzi installation, we recommend when going to production that you use that. This guide provides a means to deploy Kafka as quickly and simply as possible for evaluation purposes, it won't give you a robust production setup.
+[Lightbend](https://www.lightbend.com) provides a [commercially supported](https://www.lightbend.com/lightbend-platform) Strimzi installation, we recommend when going to production that you use that. The documentation for using the Lightbend supported Strimzi release can be found [here](https://developer.lightbend.com/docs/fast-data-platform/current/index.html#strimzi-operator-kafka). This guide provides a means to deploy Kafka as quickly and simply as possible for evaluation purposes, it won't give you a robust production setup.
 
 ## Installing Strimzi
 

@@ -119,7 +119,7 @@ Now add the environment variable to your deployment spec, configuring it to read
 
 ## Connecting to Postgres
 
-In @ref:[Deploying Postgres](deploying-postgres.md) we deployed a Postgres server, created a database, username and password, and put the password in the Kubernetes secrets API. Now we need to configure our application to connect and consume the secret.
+In @ref:[Prerequisites](prerequisites.md#postgres) we described the requirements the sample app and this guide have for a Postgres service, including the requirement for the service to be called `postgresql`, and for there to be a secret called `postgres-shopping-cart`. Now we need to configure our application to connect to that service and consume the secret.
 
 In `prod-application.conf`, add the following configuration:
 
@@ -154,7 +154,7 @@ If you used a different name for the Postgres database deployment, or for the Ku
 
 ## Connecting to Kafka
 
-In @ref:[Deploying Kafka](deploying-kafka.md), we deployed a Kafka instance, which we called `strimzi`. To connect to it, we simply need to pass the URL the service name for it to the Lagom application.
+In @ref:[Prerequisites](prerequisites.md#kafka), we described the requirements that this guide has for a Kafka instance. Now we need to configure Lagom to use that Kafka instance. To connect to it, we simply need to pass the URL the service name for it to the Lagom application.
 
 Lagom will automatically read an environment variable called `KAFKA_SERVICE_NAME` if present, so there's nothing to configure in our configuration file, we just need to update the spec to pass that environment variable, pointing to the Kafka service we provisioned. The actual service name that we need to configure needs to match the SRV lookup for the Kafka broker - our Kafka broker defines a TCP port called `clients`, to lookup the IP address or host name and port number for this, we need to use a service name of `_clients._tcp.strimzi-kafka-brokers`:
 
