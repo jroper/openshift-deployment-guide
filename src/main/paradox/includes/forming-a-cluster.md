@@ -18,6 +18,7 @@ To use Akka cluster bootstrap, you'll need to add the following dependencies to 
 
 sbt
 :    @@@vars
+
 ```scala
 libraryDependencies ++= Seq(
   "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % "$akka.management.version$",
@@ -29,6 +30,7 @@ libraryDependencies ++= Seq(
 
 Maven
 :    @@@vars
+
 ```xml
 <dependency>
   <groupId>com.lightbend.akka.management</groupId>
@@ -98,7 +100,9 @@ These routes expose information which is the result of multiple internal checks.
 
 To configure cluster bootstrap, we need to tell it which discovery method will be used to discover the other nodes in the cluster. This uses Akka discovery to find nodes, however, the discovery method and configuration used in cluster bootstrap will often be different to the method used for looking up other services. The reason for this is that during cluster bootstrap, we are interested in discovering nodes even when they aren't ready to handle requests yet, for example, because they too are trying to form a cluster. If we were to use a method such as DNS to lookup other services, the Kubernetes DNS server, by default, will only return services that are ready to serve requests, indicated by their readiness check passing. Hence, when forming a new cluster, there is a chicken or egg problem, Kubernetes won't tell us which nodes are running that we can form a cluster with until those nodes are ready, and those nodes won't pass their readiness check until they've formed a cluster.
 
-Hence, we need to use a different discovery method for cluster bootstrap, and for Kubernetes, the simplest method is to use the Kubernetes API, which will return all nodes regardless of their readiness state. This can be configured like so:
+Hence, we need to use a different discovery method for cluster bootstrap, and for Kubernetes, the simplest method is to use the Kubernetes API, which will return all nodes regardless of their readiness state. 
+
+First, you need to depend on `akka-discovery-kubernetes-api`  (see the list of dependencies listed at the beginning of this page for the exact syntax) and then you must configure that discovery mechanism like so:
 
 @@@vars
 ```
@@ -123,7 +127,8 @@ A few things to note:
 * The `service-name` needs to match the `app` label applied to your pods in the deployment spec.
 * The `required-contact-point-nr` has been configured to read the environment variable `REQUIRED_CONTACT_POINT_NR`. This is the number of pods that Akka Cluster Bootstrap must discover before it will form a cluster. It's very important to get this number right, let's say it was configured to be two, and you deployed five pods for this application, and all five started at once, it's possible, due to eventual consistency in the Kubernetes API, that two of the nodes might discover each other, and decide to form a cluster, and the other two nodes might discover each other, and also decide to form a cluster. The result will be two separate clusters formed, and this can have disastrous results. For this reason, we'll pass this in the deployment spec, which will be the same place that we'll configure the number of replicas. This will help us ensure that the number of replicas equals the required contact point number, ensuring we safely form one and only one cluster on bootstrap.
 * The `pod-port-name` and `pod-label-selector` are actually set to their default values, and so are not needed, however it's important that they match what's in the deployment spec. The `pod-port-name` needs to match a `ports` entry in the pod spec, while the `pod-label-selector` needs to match a query that will return only and all the pods for this particular service.
-<!--- #configuring -->
+* Querying the Kubernetes API will require setting up Kubernetes RBAC (see below). 
+  <!--- #configuring -->
 
 ## Starting
 
