@@ -27,7 +27,7 @@ mainClass in Compile := Some("com.lightbend.example.Main")
 <!--- #no-setup --->
 ### Selecting a JDK
 
-By default, sbt native packager uses the `openjdk` latest Docker image from DockerHub. At time of writing, this will give you OpenJDK 11, which is not certified by Lightbend, and it also gives you the Debian OpenJDK build, which is not certified by Lightbend. For a full list of Lightbend certified JDK builds and versions, see [here](https://developer.lightbend.com/docs/reactive-platform/2.0/supported-java-versions/index.html).
+By default, sbt native packager uses the `openjdk` latest Docker image from DockerHub. At time of writing, this will give you OpenJDK 11, which is not certified by Lightbend, and it also gives you the Debian OpenJDK build, which is not certified by Lightbend either. For a full list of Lightbend certified JDK builds and versions, see [here](https://developer.lightbend.com/docs/reactive-platform/2.0/supported-java-versions/index.html).
 
 If you're a RedHat customer, then you will probably want to use RedHat's certified OpenJDK base image, which is using RHEL. These OpenJDK builds are certified by Lightbend too for use with Lightbend products. This can be configured using:
 
