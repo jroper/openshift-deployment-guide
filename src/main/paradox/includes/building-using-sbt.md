@@ -43,7 +43,7 @@ dockerBaseImage := "adoptopenjdk/openjdk8"
 
 ### Git hash based version numbers
 
-This step is optional, but we recommend basing the version number of your application on the current git hash, since this ensures that you will always be able to map whats deployed to production back to the exact version of your application being used.
+This step is optional, but we recommend basing the version number of your application on the current git hash, since this ensures that you will always be able to map what is deployed to production back to the exact version of your application being used.
 
 There are a number of sbt plugins available for generating a version number from a git hash, we're going to use [`sbt-dynver`](https://github.com/dwijnand/sbt-dynver), which incorporates the most recent git tag as the base version number, appends the git hash to that only if there are any changes since that tag, and also includes a datetime stamp if there are local changes in the repository. To add this plugin to your project, add the following to `project/plugins.sbt`:
 
