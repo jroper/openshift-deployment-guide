@@ -2,8 +2,8 @@ enablePlugins(ParadoxPlugin)
 
 name := "lightbend-openshift-guide"
 
-val akkaManagementVersion = "1.0.0-RC2"
-val lagomAkkaDiscoveryVersion = "0.0.12"
+val akkaManagementVersion = "1.0.0"
+val lagomAkkaDiscoveryVersion = "0.1.0"
 val lagomVersion = "1.4.11"
 
 paradoxProperties ++= Map(
