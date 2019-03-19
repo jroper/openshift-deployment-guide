@@ -53,10 +53,12 @@ Maven
 ## Configuring cluster bootstrap
 
 There are three components that need to be configured for cluster bootstrap to work, Akka Cluster, Akka Management HTTP, and Akka Cluster Bootstrap.
+<!--- #configuring -->
 
+<!--- #configuring-general-config -->
 ### Akka Cluster
 
-The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout.
+The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
 
 ```HOCON
 akka {
@@ -65,42 +67,65 @@ akka {
     }
 
     cluster {
+        # after 60s of unsuccessul attempts to form a cluster, 
+        # the actor system will be terminated
         shutdown-after-unsuccessful-join-seed-nodes = 60s
+        # exit jvm on actor system termination
+        akka.coordinated-shutdown.exit-jvm = on
     }
 }
 ```
+<!--- #configuring-general-config -->
 
+
+<!--- #configuring-akka-mngt-config -->
 ### Akka management HTTP
 
 Akka management HTTP provides an HTTP API for querying the status of the Akka cluster, used both by the bootstrap process, as well as healthchecks to ensure requests don't get routed to your pods until the pods have joined the cluster.
 
 The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address.
+<!--- #configuring-akka-mngt-config -->
 
+<!--- #configuring-health-check-config -->
 ### Health Checks
 
-Once Akka management HTTP is included on your process it is possible to deploy [health check routes](https://developer.lightbend.com/docs/akka-management/current/healthchecks.html) (the routes are part of Akka management HTTP but not enabled by default). To enable the health check routes add the following on `prod-application.conf`:
-
-```
-akka {
-    management {
-        http.route-providers += akka.management.HealthCheckRoutes
-    }
-}
-```
-
-This will expose liveness and readiness health checks on `/alive` and `/ready` respectively. 
+Akka management HTTP includes [health check routes](https://developer.lightbend.com/docs/akka-management/current/healthchecks.html) that will expose liveness and readiness health checks on `/alive` and `/ready` respectively. 
 
 In Kubernetes, if an application is live, it means its running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or in our case, it may not have formed a cluster yet. By separating liveness and readiness, Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
 
-These routes expose information which is the result of multiple internal checks. For example, by depending on `akka-management-cluster-http` (see above) the health checks will take cluster membership status into consideration and will be a check to ensure that a cluster has been formed.
+These routes expose information which is the result of multiple internal checks. For example, by depending on `akka-management-cluster-http` the health checks will take cluster membership status into consideration and will be a check to ensure that a cluster has been formed.
+<!--- #configuring-health-check-config -->
 
+<!--- #configuring-cluster-bootsrap-config -->
 ### Cluster bootstrap
 
 To configure cluster bootstrap, we need to tell it which discovery method will be used to discover the other nodes in the cluster. This uses Akka discovery to find nodes, however, the discovery method and configuration used in cluster bootstrap will often be different to the method used for looking up other services. The reason for this is that during cluster bootstrap, we are interested in discovering nodes even when they aren't ready to handle requests yet, for example, because they too are trying to form a cluster. If we were to use a method such as DNS to lookup other services, the Kubernetes DNS server, by default, will only return services that are ready to serve requests, indicated by their readiness check passing. Hence, when forming a new cluster, there is a chicken or egg problem, Kubernetes won't tell us which nodes are running that we can form a cluster with until those nodes are ready, and those nodes won't pass their readiness check until they've formed a cluster.
 
 Hence, we need to use a different discovery method for cluster bootstrap, and for Kubernetes, the simplest method is to use the Kubernetes API, which will return all nodes regardless of their readiness state. 
 
-First, you need to depend on `akka-discovery-kubernetes-api`  (see the list of dependencies listed at the beginning of this page for the exact syntax) and then you must configure that discovery mechanism like so:
+First, you need to depend on `akka-discovery-kubernetes-api`: 
+
+sbt
+:    @@@vars
+```scala
+libraryDependencies ++= Seq(
+  "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % "$akka.management.version$"
+)
+```
+@@@
+
+Maven
+:    @@@vars
+```xml
+<dependency>
+  <groupId>com.lightbend.akka.discovery</groupId>
+  <artifactId>akka-discovery-kubernetes-api_2.12</artifactId>
+  <version>$akka.management.version$</version>
+</dependency>
+```
+@@@
+
+Then you must configure that discovery mechanism like so:
 
 @@@vars
 ```
@@ -121,7 +146,7 @@ A few things to note:
 * The `service-name` needs to match the `app` label applied to your pods in the deployment spec.
 * The `required-contact-point-nr` has been configured to read the environment variable `REQUIRED_CONTACT_POINT_NR`. This is the number of pods that Akka Cluster Bootstrap must discover before it will form a cluster. It's very important to get this number right, let's say it was configured to be two, and you deployed five pods for this application, and all five started at once, it's possible, due to eventual consistency in the Kubernetes API, that two of the nodes might discover each other, and decide to form a cluster, and the other two nodes might discover each other, and also decide to form a cluster. The result will be two separate clusters formed, and this can have disastrous results. For this reason, we'll pass this in the deployment spec, which will be the same place that we'll configure the number of replicas. This will help us ensure that the number of replicas equals the required contact point number, ensuring we safely form one and only one cluster on bootstrap.
 * Querying the Kubernetes API will require setting up Kubernetes RBAC (see below). 
-  <!--- #configuring -->
+<!--- #configuring-cluster-bootsrap-config -->
 
 ## Starting
 
@@ -213,6 +238,16 @@ Finally, we need to configure the health checks. As mentioned earlier, Akka Mana
 ports:
   - name: management
     containerPort: 8558
+<<<<<<< HEAD
+=======
+```
+
+### Health checks probes configuration 
+
+Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. In addition, we'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
+
+```yaml
+>>>>>>> Adapt for Lagom 1.5.0 deployment
 readinessProbe:
   httpGet:
     path: "/ready"
