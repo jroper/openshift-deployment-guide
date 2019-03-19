@@ -18,7 +18,6 @@ To use Akka cluster bootstrap, you'll need to add the following dependencies to 
 
 sbt
 :    @@@vars
-
 ```scala
 libraryDependencies ++= Seq(
   "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % "$akka.management.version$",
@@ -30,7 +29,6 @@ libraryDependencies ++= Seq(
 
 Maven
 :    @@@vars
-
 ```xml
 <dependency>
   <groupId>com.lightbend.akka.management</groupId>
