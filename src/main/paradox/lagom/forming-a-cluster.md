@@ -12,12 +12,16 @@ These components are automatically added by Lagom whenever Lagom Persistence or 
 
 ### Akka Cluster
 
-Most of the Akka cluster configuration is already handled by Lagom. There is one thing we need to configure which is the timeout for the cluster formation. We want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
+Most of the Akka cluster configuration is already handled by Lagom. There are two things we need to configure, we need to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Lagom to exit the JVM when that happens. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
 
 ```HOCON
 # after 60s of unsuccessul attempts to form a cluster, 
-# the actor system will be terminated causing the shutdown of the Lagom service
+# the actor system will be terminated
 akka.cluster.shutdown-after-unsuccessful-join-seed-nodes = 60s
+
+# exit jvm on actor system termination
+# this will allow Kubernetes to restart the pod
+lagom.cluster.exit-jvm-when-system-terminated = on
 ```
 
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-akka-mngt-config }
