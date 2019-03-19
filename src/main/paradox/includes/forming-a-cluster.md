@@ -145,7 +145,7 @@ Java
 
 ### Role-Based Access Control
 
-By default, pods are unable to use the Kubernetes API because they are not authenticated to do so. In order to allow the applications pods form an Akka CLuster using the Kubernetes API, we need to define some Role-Based Access Control (RBAC) roles and bindings.
+By default, pods are unable to use the Kubernetes API because they are not authenticated to do so. In order to allow the applications pods to form an Akka CLuster using the Kubernetes API, we need to define some Role-Based Access Control (RBAC) roles and bindings.
 
 RBAC allows the configuration of access control using two key concepts, roles, and role bindings. A role is a set of permissions to access something in the Kubernetes API. For example, a `pod-reader` role may have permission to perform the `list`, `get` and `watch` operations on the `pods` resource in a particular namespace, by default the same namespace that the role is configured in. In fact, that's exactly what we are going to configure, as this is the permission that our pods need. Here's the spec for the `pod-reader` role:
 
