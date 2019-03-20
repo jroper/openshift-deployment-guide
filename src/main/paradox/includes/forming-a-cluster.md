@@ -68,7 +68,7 @@ akka {
 
     cluster {
         # after 60s of unsuccessul attempts to form a cluster, 
-        # the actor system will be terminated
+        # the actor system will shut down
         shutdown-after-unsuccessful-join-seed-nodes = 60s
     }
     # exit jvm on actor system termination

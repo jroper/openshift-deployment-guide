@@ -16,7 +16,7 @@ Most of the Akka cluster configuration is already handled by Lagom. There are tw
 
 ```HOCON
 # after 60s of unsuccessul attempts to form a cluster, 
-# the actor system will be terminated
+# the actor system will shut down
 akka.cluster.shutdown-after-unsuccessful-join-seed-nodes = 60s
 
 # exit jvm on actor system termination
