@@ -82,7 +82,7 @@ akka {
 <!--- #configuring-akka-mngt-config -->
 ### Akka management HTTP
 
-Akka management HTTP provides an HTTP API for querying the status of the Akka cluster, used both by the bootstrap process, as well as healthchecks to ensure requests don't get routed to your pods until the pods have joined the cluster.
+Akka management HTTP provides an HTTP API for querying the status of the Akka cluster, used both by the bootstrap process, as well as @ref:[health checks](#health-checks) to ensure requests don't get routed to your pods until the pods have joined the cluster.
 
 The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address.
 <!--- #configuring-akka-mngt-config -->
