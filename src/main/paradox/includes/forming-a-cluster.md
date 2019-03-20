@@ -58,8 +58,8 @@ There are three components that need to be configured for cluster bootstrap to w
 <!--- #configuring-general-config -->
 ### Akka Cluster
 
-The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Akka to exit the JVM when that happens. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
-Setup](setup/index.md)
+The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Akka to exit the JVM when that happens. This is very important, @ref:[as we will see further down](#health-checks), we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
+
 ```HOCON
 akka {
     actor {
@@ -86,16 +86,6 @@ Akka management HTTP provides an HTTP API for querying the status of the Akka cl
 
 The default configuration for Akka management HTTP is suitable for use in Kubernetes, it will bind to a default port of 8558 on the pods external IP address.
 <!--- #configuring-akka-mngt-config -->
-
-<!--- #configuring-health-check-config -->
-### Health Checks
-
-Akka management HTTP includes [health check routes](https://developer.lightbend.com/docs/akka-management/current/healthchecks.html) that will expose liveness and readiness health checks on `/alive` and `/ready` respectively. 
-
-In Kubernetes, if an application is live, it means its running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or in our case, it may not have formed a cluster yet. By separating liveness and readiness, Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
-
-These routes expose information which is the result of multiple internal checks. For example, by depending on `akka-management-cluster-http` the health checks will take cluster membership status into consideration and will be a check to ensure that a cluster has been formed.
-<!--- #configuring-health-check-config -->
 
 <!--- #configuring-cluster-bootsrap-config -->
 ### Cluster bootstrap
@@ -230,25 +220,27 @@ Now down in the environment variables section, add the `REQUIRED_CONTACT_POINT_N
 - name: REQUIRED_CONTACT_POINT_NR
   value: "3"
 ```
+<!--- #deployment-spec --->
 
-### Health checks
+<!--- #configuring-health-check -->
+### Health Checks
 
+Akka management HTTP includes [health check routes](https://developer.lightbend.com/docs/akka-management/current/healthchecks.html) that will expose liveness and readiness health checks on `/alive` and `/ready` respectively. 
+
+In Kubernetes, if an application is live, it means it is running - it hasn't crashed. But it may not necessarily be ready to serve requests, for example, it might not yet have managed to connect to a database, or, in our case, it may not have formed a cluster yet. 
+
+By separating [liveness and readiness](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes), Kubernetes can distinguish between fatal errors, like crashing, and transient errors, like not being able to contact other resources that the application depends on, allowing Kubernetes to make more intelligent decisions about whether an application needs to be restarted, or if it just needs to be given time to sort itself out.
+
+These routes expose information which is the result of multiple internal checks. For example, by depending on `akka-management-cluster-http` the health checks will take cluster membership status into consideration and will be a check to ensure that a cluster has been formed.
+<!--- #configuring-health-check -->
+
+<!--- #configuring-health-check-spec -->
 Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. The first thing we do is configure a name for the management port, while not strictly necessary, this allows us to refer to it by name in the probes, rather than repeating the port number each time. We'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
 
 ```yaml
 ports:
   - name: management
     containerPort: 8558
-<<<<<<< HEAD
-=======
-```
-
-### Health checks probes configuration 
-
-Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. In addition, we'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
-
-```yaml
->>>>>>> Adapt for Lagom 1.5.0 deployment
 readinessProbe:
   httpGet:
     path: "/ready"
@@ -264,4 +256,4 @@ livenessProbe:
   failureThreshold: 10
   initialDelaySeconds: 20
 ```
-<!--- #deployment-spec --->
+<!--- #configuring-health-check-spec -->

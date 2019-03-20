@@ -12,7 +12,7 @@ These components are automatically added by Lagom whenever Lagom Persistence or 
 
 ### Akka Cluster
 
-Most of the Akka cluster configuration is already handled by Lagom. There are two things we need to configure, we need to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Lagom to exit the JVM when that happens. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
+Most of the Akka cluster configuration is already handled by Lagom. There are two things we need to configure, we need to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Lagom to exit the JVM when that happens. This is very important, @ref:[as we will see further down](#health-checks), we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
 
 ```HOCON
 # after 60s of unsuccessul attempts to form a cluster, 
@@ -28,10 +28,12 @@ lagom.cluster.exit-jvm-when-system-terminated = on
 
 This component is already included and configured by Lagom. 
 
-@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-health-check-config }
-
-Lagom also includes the routes for `akka-management-cluster-http`, meaning that the readiness check will take the cluster membership status into consideration.
-
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-cluster-bootsrap-config }
 
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #deployment-spec }
+
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-health-check }
+
+Lagom also includes the routes for `akka-management-cluster-http`, meaning that the readiness check will take the cluster membership status into consideration.
+
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-health-check-spec }
