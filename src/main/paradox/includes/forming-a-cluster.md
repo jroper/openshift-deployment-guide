@@ -110,10 +110,6 @@ akka.management {
       discovery-method = kubernetes-api
       service-name = "shopping-cart"
       required-contact-point-nr = ${REQUIRED_CONTACT_POINT_NR}
-      kubernetes-api {
-        pod-port-name = management
-        pod-label-selector = "app=%s"
-      }
     }
   }
 }
@@ -124,7 +120,6 @@ A few things to note:
 
 * The `service-name` needs to match the `app` label applied to your pods in the deployment spec.
 * The `required-contact-point-nr` has been configured to read the environment variable `REQUIRED_CONTACT_POINT_NR`. This is the number of pods that Akka Cluster Bootstrap must discover before it will form a cluster. It's very important to get this number right, let's say it was configured to be two, and you deployed five pods for this application, and all five started at once, it's possible, due to eventual consistency in the Kubernetes API, that two of the nodes might discover each other, and decide to form a cluster, and the other two nodes might discover each other, and also decide to form a cluster. The result will be two separate clusters formed, and this can have disastrous results. For this reason, we'll pass this in the deployment spec, which will be the same place that we'll configure the number of replicas. This will help us ensure that the number of replicas equals the required contact point number, ensuring we safely form one and only one cluster on bootstrap.
-* The `pod-port-name` and `pod-label-selector` are actually set to their default values, and so are not needed, however it's important that they match what's in the deployment spec. The `pod-port-name` needs to match a `ports` entry in the pod spec, while the `pod-label-selector` needs to match a query that will return only and all the pods for this particular service.
 * Querying the Kubernetes API will require setting up Kubernetes RBAC (see below). 
   <!--- #configuring -->
 
@@ -210,21 +205,14 @@ Now down in the environment variables section, add the `REQUIRED_CONTACT_POINT_N
   value: "3"
 ```
 
-### Management port configuration
+### Health checks
 
-In the @ref:[cluster bootstrap configuration section](#cluster-bootstrap), we configured the `pod-port-name` to be `management`. The Kubernetes API cluster bootstrap discovery is going to look for a port declared by the pod called `management`, to know which port to use to speak to Akka HTTP management, so we need to declare that in the `ports` section of the pod spec:
+Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. The first thing we do is configure a name for the management port, while not strictly necessary, this allows us to refer to it by name in the probes, rather than repeating the port number each time. We'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
 
 ```yaml
 ports:
   - name: management
     containerPort: 8558
-```
-
-### Health checks
-
-Finally, we need to configure the health checks. As mentioned earlier, Akka Management HTTP provides health check endpoints for us, both for readiness and liveness. Kubernetes just needs to be told about this. In addition, we'll configure some of the numbers around here, we're going to tell Kubernetes to wait 20 seconds before attempting to probe anything, this gives our cluster a chance to start before Kubernetes starts trying to ask us if it's ready, and since in some scenarios, particularly if you haven't assigned a lot of CPU to your pods, it can take a long time for the cluster to start, so we'll give it a high failure threshold of 10.
-
-```yaml
 readinessProbe:
   httpGet:
     path: "/ready"
