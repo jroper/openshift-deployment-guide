@@ -58,8 +58,8 @@ There are three components that need to be configured for cluster bootstrap to w
 <!--- #configuring-general-config -->
 ### Akka Cluster
 
-The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
-
+The first thing that's needed is a general Akka cluster configuration. For the most part, we'll rely on the defaults, for example, the default port that Akka remoting binds to is 2552. But there are a few things we need to tweak. We need to first enable Akka cluster by making it the Actor provider. We also want to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Akka to exit the JVM when that happens. This is very important, as we will see further down, we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
+Setup](setup/index.md)
 ```HOCON
 akka {
     actor {
@@ -70,9 +70,10 @@ akka {
         # after 60s of unsuccessul attempts to form a cluster, 
         # the actor system will be terminated
         shutdown-after-unsuccessful-join-seed-nodes = 60s
-        # exit jvm on actor system termination
-        akka.coordinated-shutdown.exit-jvm = on
     }
+    # exit jvm on actor system termination
+    # this will allow Kubernetes to restart the pod
+    coordinated-shutdown.exit-jvm = on
 }
 ```
 <!--- #configuring-general-config -->
