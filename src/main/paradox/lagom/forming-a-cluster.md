@@ -6,29 +6,34 @@ If you're using any of the Akka cluster based features of Lagom, such as Lagom P
 
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #bootstrap-process }
 
-<!--- Later something should exist in Lagom to do automatically --->
-@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #bootstrap-deps }
-
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring }
 
-## Starting
+These components are automatically added by Lagom whenever Lagom Persistence or Lagom Pub Sub is in use, or when you explicitly enable clustering in Lagom. The following sections explain their roles, how they fit together and which extra configurations are needed.
 
-Akka Cluster Bootstrap and Akka Management HTTP both need to be started when your Lagom service starts up. The method to start up depends on whether you're using Scala or Java.
+### Akka Cluster
 
-### Scala
+Most of the Akka cluster configuration is already handled by Lagom. There are two things we need to configure, we need to tell Akka to shut itself down if it's unable to join the cluster after a given timeout and we need to tell Lagom to exit the JVM when that happens. This is very important, @ref:[as we will see further down](#health-checks), we will use the cluster formation status to decide when the service is ready to receive traffic by means of configuring a readiness health check probe. Kubernetes won't restart an application based on the readiness probe, therefore, if for some reason we fail to form a cluster we must have the means to stop the pod and let Kubernetes re-create it.
 
-To start these components when using Scala, you need to invoke the `start` methods on their respective Akka extensions in your production cake. This should be done in your application loader, which can be found in `com/example/shoppingcart/impl/ShoppingCartLoader` in `shopping-cart-impl/src/main/scala`:
+```HOCON
+# after 60s of unsuccessul attempts to form a cluster, 
+# the actor system will shut down
+akka.cluster.shutdown-after-unsuccessful-join-seed-nodes = 60s
 
-@@snip [ShoppingCartLoader.scala](code/FormingACluster.scala) { #start }
+# exit jvm on actor system termination
+# this will allow Kubernetes to restart the pod
+lagom.cluster.exit-jvm-when-system-terminated = on
+```
 
-### Java
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-akka-mngt-config }
 
-To start these components when using Java, you need to bind an eager singleton bean that starts them in its constructor. To create the bean, create a class called `com.example.shoppingcart.impl.ClusterBootstrapStart` in `shopping-cart-impl/src/main/java`:
+This component is already included and configured by Lagom. 
 
-@@snip [ClusterBootstrapStart.java](code/jdocs/lagom/ClusterBootstrapStart.java) { #start }
-
-And now bind that in `com.example.shoppingcart.impl.ShoppingCartModule`:
-
-@@snip [ShoppingCartModule.java](code/jdocs/lagom/FormingACluster.java) { #start }
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-cluster-bootsrap-config }
 
 @@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #deployment-spec }
+
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-health-check }
+
+Lagom also includes the routes for `akka-management-cluster-http`, meaning that the readiness check will take the cluster membership status into consideration.
+
+@@include[forming-a-cluster.md](../includes/forming-a-cluster.md) { #configuring-health-check-spec }
