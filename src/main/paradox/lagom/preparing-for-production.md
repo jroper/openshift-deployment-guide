@@ -210,7 +210,7 @@ akka.discovery.method = akka-dns
 
 ### Binding
 
-If you're using Java with Lagom's Guice backend, then nothing more needs to be done, The `lagom-javadsl-akka-discovery` module provides a Guice module that is automatically loaded, which provides the service locator implementation.
+If you're using Java with Lagom's Guice backend, then nothing more needs to be done, the `lagom-javadsl-akka-discovery` module provides a Guice module that is automatically loaded, which provides the service locator implementation.
 
 If however you're using Scala, you will need to wire in the service locator yourself. To do this, modify your production application cake to mix the Akka discovery service locator components in, by opening `com/example/shoppingcart/impl/ShoppingCartLoader.scala` in `shopping-cart/src/main/scala`, and modifying the `load` method:
 
