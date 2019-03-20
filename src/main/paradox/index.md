@@ -1,6 +1,6 @@
 # Deploying Lightbend applications to OpenShift
 
-This guide describes how to deploy Akka, Lagom and Play applications to OpenShift.
+This guide describes how to deploy Lagom applications to OpenShift. In future, we hope to expand the scope of this guide to include Akka and Play applications, in the meantime, much of this guide will be applicable to Akka and Play, but will need to be adapted.
 
 It is intended to be used by people who have a cursory understanding of OpenShift or Kubernetes - you should know what Kubernetes and OpenShift are, have a basic understanding of what a pods, services and containers are, and you should have interacted with the `oc` or `kubectl` commands before. You are not however expected to be an expert.
 
@@ -8,9 +8,7 @@ While this guide is targeted at OpenShift, much of it will be applicable to Kube
 
 ## Following this guide
 
-This guide covers how to deploy applications built using multiple Lightbend projects, namely, Akka, Lagom and Play. For your particular use case, you may only be using one of these, and so the parts of the guide specific to the other projects will not be relevant. The guide tries to maintain a smooth flow of content regardless of which technology you're using.
-
-In addition to the multiple projects, there are multiple different configurations that this guide documents, such as, using Scala and using Java, using Maven and using sbt, and using a relational database or using Cassandra. It is up to you to follow the parts that are relevant to you, and skip over the parts that are not. Note that the sample applications referenced in this guide, if they need a database, use Postgres, and the guide includes detailed instructions for installing Postgres. This is because installing Postgres in OpenShift is very straight forward. For Cassandra, you'll be more on your own.
+There are multiple different configurations that this guide documents, such as, using Scala and using Java, using Maven and using sbt, using Kafka and using a relational database. It is up to you to follow the parts that are relevant to you, and skip over the parts that are not. The sample application that is referenced by this guide is offered using either Scala or Java, either Maven or sbt, and uses Postgres and Kafka.
 
 There are two ways to use this guide. The first is to follow along using the sample applications that we have provided. This is great if you are evaluating the technologies, or just want to get a feel for deployment to production before you deploy your own apps. The second is to follow along with your own application, applying the steps we document to your application. Careful attention will need to be paid to ensuring that all config, in particular, names, get updated to match your application.
 
