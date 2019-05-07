@@ -9,9 +9,12 @@ runTest() {
     shift
     REPO=$1
     shift
+    PROJECT=$1
+    shift
     mkdir $NAME
     git clone $REPO $NAME
     cd $NAME
+    cd $PROJECT
     sed -i "s/myproject/$NAME/" deploy/shopping-cart.yaml
     oc new-project $NAME
     $THIS_SCRIPT_DIR/testLagomShoppingCart.sh -namespace $NAME $@
@@ -19,6 +22,6 @@ runTest() {
 }
 
 # Minishift
-runTest shopping-cart-scala https://github.com/lagom/shopping-cart-scala.git
-runTest shopping-cart-java-sbt https://github.com/lagom/shopping-cart-java.git
-runTest shopping-cart-java-maven https://github.com/lagom/shopping-cart-java.git -maven
+runTest shopping-cart-scala https://github.com/lagom/lagom-samples.git shopping-cart/shopping-cart-scala
+runTest shopping-cart-java-sbt https://github.com/lagom/lagom-samples.git shopping-cart/shopping-cart-java
+runTest shopping-cart-java-maven https://github.com/lagom/lagom-samples.git shopping-cart/shopping-cart-java -maven
