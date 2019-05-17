@@ -16,7 +16,7 @@ Ideally, you should follow along using a realistic OpenShift cluster, something 
 
 ## Installing OpenShift
 
-We will not actually document installing OpenShift or Minishift in this guide, since there are already resources on the web for doing this. You may already have an OpenShift installation that you can use, in which case, you can simply use that.
+We will not actually document installing OpenShift or Minishift in this guide, since there are already resources on the web for doing this. You may already have an OpenShift installation that you can use, in which case, you can simply use that. These instructions have been tested with OpenShift 3.11.
 
 ### Installing a full cluster
 
