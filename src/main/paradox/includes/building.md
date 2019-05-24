@@ -8,7 +8,7 @@ Docker registries have a convention for tags that is typically used to enforce p
 For convenience, we'll refer to the `repository-url` using the environment variable `DOCKER_REPO_URL`, so if you set that in your shell like so:
 
 ```sh
-DOCKER_REPO_URL=docker-repository-default.myopenshift.example.com
+DOCKER_REPO_URL=docker-registry-default.myopenshift.example.com
 ```
 
 Then you will be able to copy and paste commands from this guide.
