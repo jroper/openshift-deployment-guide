@@ -179,15 +179,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: read-pods
 subjects:
-- kind: User
-  name: system:serviceaccount:myproject:default
+- kind: ServiceAccount
+  name: default
 roleRef:
   kind: Role
   name: pod-reader
   apiGroup: rbac.authorization.k8s.io
 ```
-
-Note the service account name, `system:serviceaccount:myproject:default`, contains the `myproject` namespace in it. If you are using a different project name, you'll need to update it accordingly.
 
 #### A note on secrets with RBAC
 
